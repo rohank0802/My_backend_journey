@@ -39,7 +39,6 @@ function handleChange(e){
   try{
 
     const res=await axios.post(`${import.meta.env.VITE_API_URL}/products`,formData)
-    console.log(res.data)
     setFormData(res.data)
     fetchDataFromApi()
     setFormData({
@@ -52,7 +51,7 @@ function handleChange(e){
 }
 //delete functionaly
  async function handleDelete(id){
-console.log(id)
+
 try{
   await axios.delete(`${import.meta.env.VITE_API_URL}/products/${id}`)
   fetchDataFromApi()
