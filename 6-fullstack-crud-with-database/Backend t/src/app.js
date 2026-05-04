@@ -4,6 +4,7 @@ const app=express()
 const cors=require("cors")
 // this,path,stect is use for backend serves frontend means to make single server deployment
 const path=require("path")
+
 app.use(express.static("./public"))
 
 
@@ -49,8 +50,9 @@ res.status(200).json({
       })
  })
 //after that if i gave any path that is not in public folder then we will send index.html folder
- app.get('*name',(req,res)=>{
-    res.sendFile(path.join(__dirname,"..","/public/index.html"))
+ app.use('*name',(req,res)=>{
+     res.sendFile(path.join(__dirname,"..","/public/index.html"))
+   
  })
 
 module.exports=app
