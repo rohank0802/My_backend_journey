@@ -1,0 +1,14 @@
+Authentication syatem have 4 pillars
+
+1:Authentication - identify request comes to the server from which user.
+
+2:Authorization - a user can access only limited facility
+
+
+3:Validation - validate the data format. means if i have to log in some wesite i give email to login ,so in validation it will check the email is valid or not.
+
+4:Verification - like i game email something@gamil,in varification the given email is from right person or not.that is varification
+
+
+-knowing tokens how they works
+-then creating tokens and sending to the user.
