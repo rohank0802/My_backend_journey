@@ -1,0 +1,37 @@
+In this file i have build some functionality of authentication
+1-signup route with jwt_secret token
+2-signin route with jwt_secret toke 
+
+-- in signup routes i have check .when the user is giving their email,is email is already in database or not ,if it is already there the  the meesage is shown the ,this email id is already registered.
+
+--in sign in i have checked i email and pass will not matched with ou database then give message ,invalid user
+also add password should not be less then 8 character.
+
+in signin route i have created 2 jwt token 
+
+1-access-token ,expiry-1hour
+2-refresh-token, expity-7days
+
+then i use get-me route 
+
+and the flow of the get-me route is 
+
+ --if user reload the page 
+ -- then first access-token will check
+ -- if the token is working within 1hour 
+ -- then the user will login automatically
+ --but when the access-token is expired 
+ -- then the backend server check refresh token if it is valid 
+ -- then refreshtoken will verify
+ -- if refresh  token is valid 
+ -- then we create new access token with refreshtoken id 
+ --and then save the access token in browser cookie
+ -- And the user will loggedin to the website
+ -- but if the refresh token also expired
+ then the user will permatnently logged out from the website
+
+ --And they have to login again.
+
+
+ -----this was the full flow of the code------
+
