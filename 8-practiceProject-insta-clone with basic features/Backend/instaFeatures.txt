@@ -1,0 +1,17 @@
+==>basic features
+1-Authentication
+  --register (1:save user data,2:token send to user)
+  --login
+  --logout(token blacklisting)
+  --[otp based registration]
+
+
+==>post
+ --create
+ --can see the feed
+ --like posts (uncollection types)
+ --saveposts
+
+==>users
+  --following
+  --followers
