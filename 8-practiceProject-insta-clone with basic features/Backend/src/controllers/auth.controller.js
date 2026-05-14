@@ -34,7 +34,8 @@ message:"password should be more than 8 characters"
         name,username,email,password:hashedPassword,bio,profileImage
     })
     const token=jwt.sign({
-        id:createUser._id
+        id:createUser._id,
+        username:createUser.username
     },process.env.JWT_SECRET,{expiresIn:"1h"})
     res.cookie("access-jwt",token)
     res.status(201).json({
@@ -72,13 +73,15 @@ async function  loginController (req,res){
     }
     // creating acess token
     const token=jwt.sign({
-        id:user._id
+        id:user._id,
+        username:user.username
     },process.env.JWT_SECRET,{expiresIn:"1h"})
     res.cookie("access-jwt",token)
 
     // creating refresh token
     const refreshToken=jwt.sign({
-        id:user._id
+        id:user._id,
+        username:user.username
     },process.env.JWT_REFRESH_SECRET,{expiresIn:"3d"})
     res.cookie("refresh-jwt",refreshToken)
     res.status(200).json({
@@ -115,7 +118,8 @@ async function refreshPageController(req,res){
 
      // creating new accesstoken
        const creatingNewAccessToken=jwt.sign({
-        id:refreshDecoded.id
+        id:refreshDecoded.id,
+        username:refreshDecoded.username
        },process.env.JWT_SECRET,{expiresIn:"1h"})
        res.cookie("access-jwt",creatingNewAccessToken)
        res.status(201).json({

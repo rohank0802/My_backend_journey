@@ -8,25 +8,6 @@ const imageKit=new ImageKit({
 })
 // here we creating post
 async function createPostController(req,res){
-//console.log(req.body,req.file)
-
-//getting token from cookies
-const token=req.cookies["access-jwt"]
-if(!token){
-    return res.status(401).json({
-        message:"token not provided,unauthorizes access"
-    })
-}
-//if we get the token then we will varify it and decode its inside data
-let decoded
-try{
-    decoded=jwt.verify(token,process.env.JWT_SECRET)
-}
-catch(err){
-    res.status(401).json({
-        message:`${err.message},"user not authorized"`
-    })
-}
 
  const file=await imageKit.files.upload({
     file:await toFile(Buffer.from(req.file.buffer),"file"),
@@ -36,7 +17,7 @@ catch(err){
  const post=await postModel.create({
     caption:req.body.caption,
     imageUrl:file.url,
-    user:decoded.id
+    user:req.user.id
  })
  res.status(201).json({
  message:"post created successfuly",
@@ -46,24 +27,9 @@ catch(err){
 
 //verify user get  user all posts
 async function getPostController(req,res){
-const token=req.cookies["access-jwt"]
-if(!token){
-    return res.status(401).json({
-        message:"unauthorized access"
-    })
-}
-let decoded
-try{
-    decoded=jwt.verify(token,process.env.JWT_SECRET)
 
-}
-catch(err){
-    res.status(401).json({
-        message:"invalid token"
-    })
-}
 
-const userId=decoded.id
+const userId=req.user.id
 const posts=await postModel.find({user:userId})
 res.status(200).json({
     message:"posts fetched successfuly",
@@ -74,23 +40,8 @@ res.status(200).json({
 
 // verify user and then get single post
 async function getPostDetailsController(req,res){
-const token=req.cookies["access-jwt"]
-if(!token){
-    return res.status(401).json({
-        message:"unauthorized access"
-    })
-}
-let decoded
 
-try{
-decoded=jwt.verify(token,process.env.JWT_SECRET)
-}
-catch(err){
- return res.status(401).json({
-    message:"invalid token"
- })
-}
-const userId=decoded.id
+const userId=req.user.id
 const postId=req.params.postId
 const post=await postModel.findById(postId)
 if(!post){
