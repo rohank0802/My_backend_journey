@@ -21,4 +21,11 @@ postRouter.get("/",identifyUser,postController.getPostController)
 
 postRouter.get("/details/:postId",identifyUser,postController.getPostDetailsController)
 
+
+// for like route
+postRouter.post("/like/:postId",identifyUser,postController.createLikeController)
+
+//for unlike 
+postRouter.post("/unlike/:postId",identifyUser,postController.createUnlikeController)
+
 module.exports=postRouter

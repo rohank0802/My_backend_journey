@@ -1,4 +1,5 @@
 const postModel=require("../models/post.model")
+const likeModel=require("../models/like.model")
 const ImageKit=require("@imagekit/nodejs")
 const {toFile}=require("@imagekit/nodejs")
 const jwt=require("jsonwebtoken")
@@ -64,9 +65,60 @@ return res.status(200).json({
 }
 
 
+// know we will make controlle  like
+
+async function createLikeController(req,res){
+    // fir we will get user id from the authmiddleware
+    const userId=req.user.id
+    //know we will get post id from params
+    const postId=req.params.postId
+
+const findPost=await postModel.findById(postId)
+if(!findPost){
+   return res.status(404).json({
+        message:"post not found"
+    })
+}
+const alreadyLiked=await likeModel.findOne({
+      user:userId,post:postId
+})
+if(alreadyLiked){
+    return res.status(200).json({
+        message:"you already liked that post"
+    })
+}
+    const like=await likeModel.create({
+       user:userId,post:postId
+    })
+    res.status(201).json({
+        message:"like created sucessfuly",
+        like
+    })
+}
+
+async function createUnlikeController(req,res){
+ // fir we will get user id from the authmiddleware
+    const userId=req.user.id
+    //know we will get post id from params
+    const postId=req.params.postId
+
+    const findPost=await likeModel.findById(postId)
+    if(!findPost){
+        return res.status(404).json({
+            message:"post is not exist"
+        })
+    }
+    const unlikePost=await likeModel.findByIdAndDelete(postId)
+    res.status(200).json({
+        message:"you have sucessfully unliked "
+    })
+
+}
 
 module.exports={
     createPostController,
     getPostController,
-    getPostDetailsController
+    getPostDetailsController,
+    createLikeController,
+    createUnlikeController
 }
