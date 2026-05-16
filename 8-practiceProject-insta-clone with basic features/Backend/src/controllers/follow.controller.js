@@ -27,7 +27,10 @@ if(followerUsername===followeeUsername){
 // check same user don,t follow again
 const isAlreadyFollowing=await followModel.findOne({
     follower:followerUsername,
-    followee:followeeUsername
+    followee:followeeUsername,
+    status:{
+        $in:["pending","accepted"]
+    }
 })
 
 
@@ -40,14 +43,66 @@ if(isAlreadyFollowing){
 
 const followRecord=await followModel.create({
     follower:followerUsername,
-    followee:followeeUsername
+    followee:followeeUsername,
+    status:"pending"
 })
 res.status(201).json({
     message:`yor are know following ${followeeUsername}`,
     follow:followRecord
 })
 }
+//for accept follow request
+async function acceptFollowRequest(req,res){
+    try{
 
+        const requestId=req.params.id
+        const request=await followModel.findById(requestId)
+        if(!request){
+            return res.status(404).json({
+                message:"request not found"
+            })
+        }
+        //change status 
+        request.status="accepted"
+        //save updated request
+        await request.save()
+        res.status(200).json({
+            message:"folloe request accepted",
+            follow:request
+        })
+        }
+        catch(err){
+          res.status(500).json({
+            message:`${err.message},error while creating accept req function`
+          })
+        }
+    }
+
+async function rejectFollowRequest(req,res){
+   try{
+const requestId=req.params.id
+
+    const request=await followModel.findById(requestId)
+
+    if(!request){
+       return res.status(404).json({
+            message:"user not found"
+        })
+    }
+
+    request.status="rejected"
+    await request.save()
+    res.status(200).json({
+        message:"request successfuly rejected"
+    })
+   }
+   catch(err){
+  res.status(500).json({
+    message:`${err.message},error while creating rejectRequest function`
+  })
+   }
+    
+}
 
 // unfollow Controller
 async function unfollowUserController(req,res){
@@ -75,5 +130,7 @@ const followeeUsername=req.params.username
 }
 module.exports={
     followUserController,
-    unfollowUserController
+    unfollowUserController,
+    acceptFollowRequest,
+    rejectFollowRequest
 }

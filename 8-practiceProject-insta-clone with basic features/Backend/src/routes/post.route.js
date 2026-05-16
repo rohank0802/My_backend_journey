@@ -26,6 +26,6 @@ postRouter.get("/details/:postId",identifyUser,postController.getPostDetailsCont
 postRouter.post("/like/:postId",identifyUser,postController.createLikeController)
 
 //for unlike 
-postRouter.post("/unlike/:postId",identifyUser,postController.createUnlikeController)
+postRouter.delete("/unlike/:postId",identifyUser,postController.createUnlikeController)
 
 module.exports=postRouter
