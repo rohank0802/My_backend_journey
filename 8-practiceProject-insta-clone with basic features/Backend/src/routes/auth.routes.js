@@ -2,6 +2,7 @@ const express=require("express")
 const authControllers=require("../controllers/auth.controller")
 const authRouter=express.Router()
 
+const identifyUser=require("../middlewares/auth.middleware")
 //register auser
 authRouter.post("/register",authControllers.registerController)
 

@@ -37,9 +37,19 @@ message:"password should be more than 8 characters"
         id:createUser._id,
         username:createUser.username
     },process.env.JWT_SECRET,{expiresIn:"1h"})
-    res.cookie("access-jwt",token)
+    res.cookie("access-jwt",token,{
+        secure:false,
+        sameSite:"lax"
+    })
     res.status(201).json({
-        message:"account created sucessfully"
+        message:"account created sucessfully",
+        data:{
+           id:createUser._id,
+           name:createUser.name,
+           username:createUser.username,
+           email:createUser.email,
+           profileImage:createUser.profileImage
+        }
     })
     }
     catch(err){
@@ -76,21 +86,36 @@ async function  loginController (req,res){
         id:user._id,
         username:user.username
     },process.env.JWT_SECRET,{expiresIn:"1h"})
-    res.cookie("access-jwt",token)
+    res.cookie("access-jwt",token,{
+        secure:false,
+        sameSite:"lax"
+    })
 
     // creating refresh token
     const refreshToken=jwt.sign({
         id:user._id,
         username:user.username
     },process.env.JWT_REFRESH_SECRET,{expiresIn:"3d"})
-    res.cookie("refresh-jwt",refreshToken)
+    res.cookie("refresh-jwt",refreshToken,{
+        secure:false,
+        sameSite:"lax"
+    })
     res.status(200).json({
-        message:"login successful"
+        message:"login successful",
+          data:{
+        name:user.name,
+        username:user.username,
+        email:user.email,
+        profileImage:user.profileImage,
+        bio:user.bio
+
+
+    }
     })
   }
   catch(err){
   res.status(400).json({
-    message:`${err.message},-server error while creating login`
+    message:`${err.message},-server error while creating login`,
   })
   }
 }
@@ -123,7 +148,14 @@ async function refreshPageController(req,res){
        },process.env.JWT_SECRET,{expiresIn:"1h"})
        res.cookie("access-jwt",creatingNewAccessToken)
        res.status(201).json({
-        message:"new accessToken created you are reLogedIn automatically"
+        message:"new accessToken created you are reLogedIn automatically",
+         data:{
+        name:user.name,
+        username:user.username,
+        email:user.email,
+        profileImage:user.profileImage,
+        bio:user.bio
+    }
        })
      }
      catch(err){
