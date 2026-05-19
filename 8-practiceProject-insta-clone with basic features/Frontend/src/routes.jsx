@@ -6,7 +6,7 @@ export const routes=createBrowserRouter([
    
    {
     path:"/",
-    element:<p>gygygygh</p>
+    element:<p>this is home page</p>
     
    },
     {

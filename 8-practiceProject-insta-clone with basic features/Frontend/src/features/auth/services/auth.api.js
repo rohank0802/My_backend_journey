@@ -2,11 +2,12 @@ import axios from "axios"
 
 
 const api=axios.create({
-    baseURL:"http://localhost:3000/api/auth",
+  baseURL:import.meta.env.VITE_AUTH_API,
+    
     withCredentials:true
 })
 //register
-export async function registerController(registerFormdata){
+export async function register(registerFormdata){
     try{
       const response=await api.post("/register",registerFormdata)
       return response.data

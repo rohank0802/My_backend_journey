@@ -1,13 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import "../styles/form.scss"
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import axios from "axios"
-import {login} from "../services/auth.api"
+import { useAuth } from '../hooks/useAuth'
+
 const Login = ()=>{
 const [formLoginData,setFormLoginData]=useState({
   loginId:"",
   password:""
 })
+const {handleLogin,user,loading}=useAuth()
+const navigate=useNavigate()
 
 function handleChange(e){
 setFormLoginData({
@@ -15,14 +18,21 @@ setFormLoginData({
   [e.target.name]:e.target.value
 })
 }
+if(loading){
+  return(
+    <h1>loading...</h1>
+  )
+}
 
  async function handleSubmit(e){
 e.preventDefault()
 
-const data= await login(formLoginData)
-console.log(data)
+const res=await handleLogin(formLoginData)
+console.log(res.data)
+navigate("/")
 
 }
+
 
 
   return (
@@ -32,9 +42,9 @@ console.log(data)
         <form onSubmit={handleSubmit} >
             <input type="text" name='loginId' placeholder='Enter your username/Email' onChange={handleChange} />
             <input type="passwords" name="password" placeholder='Enter your password' onChange={handleChange}/>
-            <button type='submit'>Login</button>
+            <button className='button primary-button' type='submit'>Login</button>
         </form>
-        <p className='toogleAuthForm'>don,t have an account? <NavLink to='/register'><span>Register</span></NavLink></p>
+        <p className='toogleAuthForm'>dont,t have account <NavLink className="link" to="/register"><span>Register</span></NavLink></p>
     </div>
 </main>
   )
