@@ -28,7 +28,7 @@ if(loading){
 e.preventDefault()
 
 const res=await handleLogin(formLoginData)
-console.log(res.data)
+console.log(res)
 navigate("/")
 
 }

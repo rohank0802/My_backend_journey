@@ -22,6 +22,11 @@ postRouter.get("/",identifyUser,postController.getPostController)
 postRouter.get("/details/:postId",identifyUser,postController.getPostDetailsController)
 
 
+//@route POST/api/posts/feed
+//@description get all the posts created in the db
+// access private means only loggedin user can see the all feed
+postRouter.get("/feed",identifyUser,postController.getFeedController)
+
 // for like route
 postRouter.post("/like/:postId",identifyUser,postController.createLikeController)
 

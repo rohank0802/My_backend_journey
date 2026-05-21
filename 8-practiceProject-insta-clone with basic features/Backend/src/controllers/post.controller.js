@@ -1,8 +1,11 @@
 const postModel=require("../models/post.model")
+const userModel=require("../models/user.model")
 const likeModel=require("../models/like.model")
 const ImageKit=require("@imagekit/nodejs")
 const {toFile}=require("@imagekit/nodejs")
 const jwt=require("jsonwebtoken")
+const postRouter = require("../routes/post.route")
+const identifyUser = require("../middlewares/auth.middleware")
 //accessing inamgekit private key
 const imageKit=new ImageKit({
  privateKey:process.env["IMAGEKIT_PRIVATE_KEY"]
@@ -26,7 +29,7 @@ async function createPostController(req,res){
  })
 }
 
-//verify user get  user all posts
+//verify user get  user all postsn of the user
 async function getPostController(req,res){
 
 
@@ -64,8 +67,36 @@ return res.status(200).json({
 })
 }
 
+// get all posts of the users after verify login
 
-// know we will make controlle  like
+async function getFeedController(req,res){
+    try{
+       const userId=req.user.id
+       const findUserexists=await userModel.findById(userId)
+       if(!findUserexists){
+        return res.status(404).json({
+            message:"unauthorized user access denied."
+        })
+       }
+        const posts=await postModel.find().populate("user","-password")
+        res.status(200).json({
+            message:"posts fetched successfully",
+            posts
+        })
+    }
+    catch(err){
+        res.status(500).json({
+            message:`${err.message},something went wrong while creating server`
+        })
+    }
+}
+
+
+
+
+
+
+// know  will make controller of  like
 
 async function createLikeController(req,res){
     // fir we will get user id from the authmiddleware
@@ -120,5 +151,6 @@ module.exports={
     getPostController,
     getPostDetailsController,
     createLikeController,
-    createUnlikeController
+    createUnlikeController,
+    getFeedController
 }
