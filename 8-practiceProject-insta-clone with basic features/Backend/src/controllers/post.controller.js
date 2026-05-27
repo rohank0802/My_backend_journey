@@ -78,8 +78,16 @@ async function getFeedController(req,res){
             message:"unauthorized user access denied."
         })
        }
-        const posts=await postModel.find().populate("user","-password")
-        res.status(200).json({
+        const posts=await Promise.all((await postModel.find({}).sort({_id:-1}).populate("user","-password").lean()).map(async(post)=>{
+            const isLiked=await likeModel.findOne({
+                user:userId,
+                post:post._id
+
+            })
+            post.isLiked=Boolean(isLiked)
+            return post
+        }))
+        res.status(200).json({ 
             message:"posts fetched successfully",
             posts
         })
@@ -121,6 +129,7 @@ if(alreadyLiked){
     const like=await likeModel.create({
        user:userId,post:postId
     })
+    await like.populate("user","-password -email")
     res.status(201).json({
         message:"like created sucessfuly",
         like
