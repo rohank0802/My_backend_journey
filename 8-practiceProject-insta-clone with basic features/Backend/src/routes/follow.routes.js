@@ -14,7 +14,16 @@ followRouter.post("/follow/:username",identifyUser,followController.followUserCo
 followRouter.delete("/unfollow/:username",identifyUser,followController.unfollowUserController)
 
 //accept follow request route
-followRouter.post("/follow/accept/:id",identifyUser,followController.acceptFollowRequest)
+followRouter.post("/follow/accept/:followee",identifyUser,followController.acceptFollowRequest)
 // reject following request
-followRouter.post("/follow/reject/:id",identifyUser,followController.rejectFollowRequest)
+followRouter.post("/follow/reject/:followee",identifyUser,followController.rejectFollowRequest)
+
+// give all the users name and prifile after verify
+followRouter.get("/getAll-users",identifyUser,followController.getAllUsersController)
+//following route
+followRouter.get("/following/:username",identifyUser,followController.getFollowingController)
+
+//follower route
+followRouter.get("/follower/:username",identifyUser,followController.getFollowerController)
+
 module.exports=followRouter

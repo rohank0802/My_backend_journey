@@ -48,15 +48,15 @@ const followRecord=await followModel.create({
 })
 res.status(201).json({
     message:`yor are know following ${followeeUsername}`,
-    follow:followRecord
+    // follow:followRecord
 })
 }
 //for accept follow request
 async function acceptFollowRequest(req,res){
     try{
 
-        const requestId=req.params.id
-        const request=await followModel.findById(requestId)
+       
+        const request=await followModel.findOne({followee:req.params.followee})
         if(!request){
             return res.status(404).json({
                 message:"request not found"
@@ -66,6 +66,7 @@ async function acceptFollowRequest(req,res){
         request.status="accepted"
         //save updated request
         await request.save()
+        
         res.status(200).json({
             message:"folloe request accepted",
             follow:request
@@ -80,9 +81,8 @@ async function acceptFollowRequest(req,res){
 
 async function rejectFollowRequest(req,res){
    try{
-const requestId=req.params.id
 
-    const request=await followModel.findById(requestId)
+    const request=await followModel.findOne({followee:req.params.followee})
 
     if(!request){
        return res.status(404).json({
@@ -128,9 +128,72 @@ const followeeUsername=req.params.username
 
  })
 }
+
+//after verify user give all the user details
+async function getAllUsersController(req,res){
+const verify=req.user.id
+const verifyuser=await userModel.findById(verify)
+if(!verifyuser){
+    return res.status(401).json({
+        messsage:"Unauthorized access"
+    })
+}
+const user=await userModel.find({})
+return res.status(200).json({
+    message:"here is all user deatils",
+    user
+
+})
+
+}
+//getFollowing controllers
+async function getFollowingController(req,res){
+    try{
+
+        const following=await followModel.find({
+            follower:req.user.username,
+            status:"accepted"
+        })
+        
+        res.status(200).json({
+            message:"following fetched sucessfully",
+            following
+
+        })
+    }
+    catch(err){
+    res.satus(400).json({
+        message:`${err.message},something wrong while creating following on server`
+    })
+    }
+}
+
+async function getFollowerController(req,res){
+    try{
+
+        const follower=await followModel.find({
+            followee:req.user.username,
+            status:"accepted"
+        })
+       
+      return  res.status(200).json({
+            message:"follower fetched sucessfully",
+            follower
+
+        })
+    }
+    catch(err){
+    res.satus(400).json({
+        message:`${err.message},something wrong while creating follower on server`
+    })
+    }
+}
 module.exports={
     followUserController,
     unfollowUserController,
     acceptFollowRequest,
-    rejectFollowRequest
+    rejectFollowRequest,
+    getAllUsersController,
+    getFollowingController,
+    getFollowerController
 }

@@ -5,7 +5,7 @@ const ImageKit=require("@imagekit/nodejs")
 const {toFile}=require("@imagekit/nodejs")
 const jwt=require("jsonwebtoken")
 const postRouter = require("../routes/post.route")
-const identifyUser = require("../middlewares/auth.middleware")
+
 //accessing inamgekit private key
 const imageKit=new ImageKit({
  privateKey:process.env["IMAGEKIT_PRIVATE_KEY"]
@@ -142,13 +142,16 @@ async function createUnlikeController(req,res){
     //know we will get post id from params
     const postId=req.params.postId
 
-    const findPost=await likeModel.findById(postId)
+    const findPost=await likeModel.findOne({
+        post:postId,
+        user:userId
+    })
     if(!findPost){
         return res.status(404).json({
             message:"post is not exist"
         })
     }
-    const unlikePost=await likeModel.findByIdAndDelete(postId)
+    const unlikePost=await likeModel.findOneAndDelete({post:postId})
     res.status(200).json({
         message:"you have sucessfully unliked "
     })

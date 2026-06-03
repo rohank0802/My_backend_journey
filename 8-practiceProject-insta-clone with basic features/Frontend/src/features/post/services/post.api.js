@@ -31,3 +31,27 @@ export async function createPost(imageFile,caption){
       console.log(err.message, "while fetching api")
     }
 }
+
+
+export async function likePost(postId){
+    try{
+
+        const response=await api.post(`/api/posts/like/${postId}`)
+        return response.data
+    }
+    catch(err){
+        console.log(err.message)
+    }
+}
+
+
+export async function unLikePost(postId){
+    try{
+
+        const response=await api.delete(`/api/posts/unlike/${postId}`)
+        return response.data
+    }
+    catch(err){
+        console.log(err.message)
+    }
+}

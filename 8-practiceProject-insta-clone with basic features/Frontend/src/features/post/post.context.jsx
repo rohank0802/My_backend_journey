@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { getFeed,createPost } from "./services/post.api";
+import { getFeed,createPost, likePost, unLikePost } from "./services/post.api";
 export const postContext=createContext()
 
 export const PostContextProvider=({children})=>{
@@ -37,8 +37,34 @@ finally{
     setLoading(false)
 }
 }
+
+const handleLikePost=async(postId)=>{
+    
+    try{
+        const response=await likePost(postId)
+       await handleGetFeed()
+        
+    }
+    catch(err){
+        console.log(err.message)
+    }
+   
+}
+
+const handleUnLikePost=async(postId)=>{
+
+ try{
+    const response=await unLikePost(postId)
+    
+    await handleGetFeed()
+ }
+ catch(err){
+console.log(err.message)
+ }
+
+}
 return(
-<postContext.Provider value={{loading,post,feed,handleGetFeed,handleCreatePost}}>
+<postContext.Provider value={{loading,post,feed,handleGetFeed,handleCreatePost,handleLikePost,handleUnLikePost}}>
     {children}
 </postContext.Provider>
 )

@@ -6,13 +6,13 @@ const CreatePost = () => {
   const [caption,setCaption]=useState("")
   const postImageFieldRef=useRef(null)
 
-const {loading,handleCreatePost}=usePost()
+const {Loading,handleCreatePost}=usePost()
 const navigate=useNavigate()
- async function handleSubmit(e){
+ async function handleSubmit(){
 e.preventDefault()
 
 const file=postImageFieldRef.current.files[0]
-await handleCreatePost(file,caption)
+await handleCreate(file,caption)
 navigate("/")
   }
   if(loading){

@@ -95,7 +95,7 @@ async function  loginController (req,res){
     const refreshToken=jwt.sign({
         id:user._id,
         username:user.username
-    },process.env.JWT_REFRESH_SECRET,{expiresIn:"3d"})
+    },process.env.JWT_REFRESH_SECRET,{expiresIn:"7d"})
     res.cookie("refresh-jwt",refreshToken,{
         secure:false,
         sameSite:"lax"
@@ -121,13 +121,19 @@ async function  loginController (req,res){
 }
 //refresh page controller
 async function refreshPageController(req,res){
+    let user
     try{
-
         const accessToken=req.cookies["access-jwt"]
         const decoded=jwt.verify(accessToken,process.env.JWT_SECRET)
-        const user=await userModel.findById(decoded.id)
+         user=await userModel.findById(decoded.id)
         return res.status(200).json({
-            message:"auto relogin successful old"
+            message:"auto relogin successful", data:{
+        name:user.name,
+        username:user.username,
+        email:user.email,
+        profileImage:user.profileImage,
+        bio:user.bio
+    }
         })
     }
     catch(err){
@@ -149,7 +155,7 @@ async function refreshPageController(req,res){
        res.cookie("access-jwt",creatingNewAccessToken)
        res.status(201).json({
         message:"new accessToken created you are reLogedIn automatically",
-         data:{
+          data:{
         name:user.name,
         username:user.username,
         email:user.email,

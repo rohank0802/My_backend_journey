@@ -13,6 +13,8 @@ setLoading(true)
 try{
 const response=await login(formLoginData)
 setUser(response.data)
+console.log(response.data)
+
 
 return response
 }
@@ -39,6 +41,18 @@ const handleRegister=async(registerFormdata)=>{
         setLoading(false)
     }
 }
+
+
+useEffect(()=>{
+    
+    async function fetchUser(){
+        const response=await getMe()
+        setUser(response.data)
+        
+    } 
+    fetchUser()
+
+},[])
 
 return(
     <authContext.Provider value={{user,loading,handleLogin,handleRegister}}>
