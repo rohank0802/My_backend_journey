@@ -6,7 +6,7 @@ const CreatePost = () => {
   const [caption,setCaption]=useState("")
   const postImageFieldRef=useRef(null)
 
-const {Loading,handleCreatePost}=usePost()
+const {loading,handleCreatePost}=usePost()
 const navigate=useNavigate()
  async function handleSubmit(){
 e.preventDefault()
