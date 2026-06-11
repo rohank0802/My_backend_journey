@@ -2,6 +2,7 @@ const userModel=require("../models/user.model")
 const bcrypt=require("bcrypt")
 const jwt=require("jsonwebtoken")
 const blacklistModel=require("../models/blacklist.model")
+const redis=require("../config/cache")
 async function registerUserController(req,res){
 
     try{
@@ -164,7 +165,7 @@ async function refreshPageController(req,res){
     username:refreshdecoded.username
   },process.env.JWT_SECRET,{expiresIn:"1h"})
   res.cookie("access_jwt",newAccessToken,{httpOnly:true,secure:false,sameSite:"lax"})
-  
+
   const user=await userModel.findById(refreshdecoded.id)
   if(!user){
     return res.status(404).json({
@@ -195,9 +196,16 @@ const token=req.cookies["access_jwt"]
 const refreshToken=req.cookies["refresh_jwt"]
 res.clearCookie("access_jwt")
 res.clearCookie("refresh_jwt")
-await blacklistModel.create({
-    token,refreshToken
-})
+
+// //blacklisting token is mongo database
+// await blacklistModel.create({
+//     token,refreshToken
+// })
+
+//know we will use redis
+await redis.set(`access:${token}`,Date.now().toString(),"Ex",60*60)
+
+await redis.set(`refresh:${refreshToken}`,Date.now().toString(),"Ex",60*60*24*7)
 res.status(201).json({
     message:"Logout sucessfully"
 })
