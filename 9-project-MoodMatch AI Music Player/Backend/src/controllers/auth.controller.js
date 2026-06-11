@@ -1,7 +1,7 @@
 const userModel=require("../models/user.model")
 const bcrypt=require("bcrypt")
 const jwt=require("jsonwebtoken")
-
+const blacklistModel=require("../models/blacklist.model")
 async function registerUserController(req,res){
 
     try{
@@ -106,7 +106,7 @@ async function loginUserController(req,res){
         id:user._id,
         username:user.username
       },process.env.JWT_SECRET,{expiresIn:"3d"})
-      res.cookie("refresh_jwt",token,{
+      res.cookie("refresh_jwt",refreshToken,{
         httpOnly:true,
         sameSite:"lax",
         secure:false
@@ -131,57 +131,40 @@ async function loginUserController(req,res){
 //refresh controller
 async function refreshPageController(req,res){
     let user
-    let decoded
     try{
-        const accessToken=req.cookies["access_jwt"]
-        if(!accessToken){
-            return res.status(401).json({
-                message:'access token missing'
-            })
-        }
-        try{
-            decoded=jwt.verify(accessToken,process.env.JWT_SECRET)
-        }
-        catch(err){
-           return res.status(401).json({
-                message:"access token expired ,or invalid",
-                err:err.message
-            })
-        }
-        user=await userModel.findById(decoded.id)
-        if(!user){
-           return res.status(404).json({
-                message:'user not found'
-            })
-        }
-        res.status(200).json({
+        const userId=req.user.id
+        user=await userModel.findById(userId)
+                if(!user){
+                    return res.status(401).json({
+                        message:"user not found"
+                    })
+                }
+                res.status(200).json({
             message:" auto reLoggin sucessfull",
             data:{
                  id:user._id,
             username:user.username,
             email:user.email
             }
-
         })
-        
     }
     catch(err){
-    const refreshtoken=req.cookies["refresh_jwt"]
-    if(!refreshtoken){
+    const refreshToken=req.cookies["refresh_jwt"]
+    if(!refreshToken){
          return res.status(401).json({
             message:'refresh token is missing please login again',
             err:err.message
         })
     }
-
     try{
-  const refreshdecoded=jwt.verify(refreshtoken,process.env.JWT_REFRESH_SECRET)
+  const refreshdecoded=jwt.verify(refreshToken,process.env.JWT_REFRESH_SECRET)
 
   const newAccessToken=jwt.sign({
     id:refreshdecoded.id,
     username:refreshdecoded.username
   },process.env.JWT_SECRET,{expiresIn:"1h"})
   res.cookie("access_jwt",newAccessToken,{httpOnly:true,secure:false,sameSite:"lax"})
+  
   const user=await userModel.findById(refreshdecoded.id)
   if(!user){
     return res.status(404).json({
@@ -207,8 +190,22 @@ async function refreshPageController(req,res){
     }
 }
 
+async function logoutUser(req,res){
+const token=req.cookies["access_jwt"]
+const refreshToken=req.cookies["refresh_jwt"]
+res.clearCookie("access_jwt")
+res.clearCookie("refresh_jwt")
+await blacklistModel.create({
+    token,refreshToken
+})
+res.status(201).json({
+    message:"Logout sucessfully"
+})
+}
+
 module.exports={
 registerUserController,
 loginUserController,
-refreshPageController
+refreshPageController,
+logoutUser
 }
