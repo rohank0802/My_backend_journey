@@ -3,7 +3,9 @@ import { detect, init } from "../utils/utils";
 
 
 
-export default function FaceExpression({ onClick = () => { } }) {
+function FaceExpression({ onClick = () => { } }) {
+
+  
     const videoRef = useRef(null);
     const landmarkerRef = useRef(null);
     const streamRef = useRef(null);
@@ -28,11 +30,9 @@ export default function FaceExpression({ onClick = () => { } }) {
 
     async function handleClick() {
         const expression = detect({ landmarkerRef, videoRef, setExpression })
-        console.log(expression)
+        console.log("received",expression)
         onClick(expression)
     }
-
-
     return (
         <div style={{ textAlign: "center" }}>
             <video
@@ -41,7 +41,8 @@ export default function FaceExpression({ onClick = () => { } }) {
                 playsInline
             />
             <h2>{expression}</h2>
-            <button onClick={handleClick} >Detect expression</button>
+            <button style={{paddingBlock:"8px",paddingInline:"8px"}} onClick={handleClick} >Detect expression</button>
         </div>
     );
 }
+export default FaceExpression

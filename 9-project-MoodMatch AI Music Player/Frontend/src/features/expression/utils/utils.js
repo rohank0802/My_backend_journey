@@ -48,7 +48,7 @@ export const detect = ({ landmarkerRef, videoRef, setExpression }) => {
         const frownLeft = getScore("mouthFrownLeft");
         const frownRight = getScore("mouthFrownRight");
 
-        console.log(getScore("mouthFrownLeft"))
+        
 
         let currentExpression = "Neutral";
 

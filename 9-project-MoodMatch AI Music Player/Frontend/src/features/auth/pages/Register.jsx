@@ -3,14 +3,14 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import "../styles/form.scss"
 import  {useAuth} from "../hooks/useAuth"
-
+import {useNavigate} from "react-router-dom"
 const register = () => {
  const [formLoginData,setFormLoginData]=useState({
     username:"",     
     email:"",
          password:""
      })
-
+  const navigate = useNavigate()
      const {loading,handleRegister}=useAuth()
      function handleChange(e){
      setFormLoginData({
@@ -21,8 +21,9 @@ const register = () => {
      
      function handleSubmit(e){
      e.preventDefault()
-     console.log(formLoginData)
+     
      handleRegister(formLoginData)
+     navigate("/")
      setFormLoginData({
         username:"",
          email:"",

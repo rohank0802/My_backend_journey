@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { createContext } from "react";
 
@@ -6,7 +7,7 @@ export const authContext=createContext()
 export function AuthProvider({children}){
 
     const [user,setUser]=useState(null)
-    const [loading,setLoading]=useState(false)
+    const [loading,setLoading]=useState(true)
 
 
     return(

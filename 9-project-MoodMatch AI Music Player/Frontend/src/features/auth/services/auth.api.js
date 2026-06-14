@@ -9,7 +9,7 @@ export async function register(registerUserData){
     try{
 
         const response =await api.post("/register",registerUserData)
-        console.log(response)
+        
         return response.data
     }
     catch(err){
