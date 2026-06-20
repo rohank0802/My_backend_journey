@@ -16,7 +16,8 @@ const userSchema= new mongoose.Schema({
     password:{
         type:String,
         required:true,
-        minlength:8
+        minlength:8,
+        select:false
     },
     verified:{
         type:Boolean,
@@ -25,7 +26,7 @@ const userSchema= new mongoose.Schema({
 },{timestamps:true})
 
 userSchema.pre("save",async function(){
-    if(!this.isModified("password"))return next()
+    if(!this.isModified("password"))return
         this.password=await bcrypt.hash(this.password,10)
 })
 

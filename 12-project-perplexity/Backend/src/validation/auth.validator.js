@@ -12,9 +12,9 @@ next()
 
 
 
-const registerValidation=[
+export const registerValidation=[
 body("username").trim().notEmpty().withMessage("Username is required").isLength({min:3,max:30}).withMessage("Username must be between 3 to 30 characters")
-.matches(/^[a-zA-Z0-9]+$/).withMessage("Username can only contain letters,numbers,and underscores"),
+.matches(/^[a-zA-Z0-9_]+$/).withMessage("Username can only contain letters,numbers,and underscores"),
 
 body("email")
 .trim()
@@ -25,4 +25,12 @@ body("password")
 .notEmpty().withMessage("Password is required")
 .isLength({min:8}).withMessage("Password must be at least 6 characters"),
 authvalidator
+]
+
+
+export const loginValidator=[
+    body("emailOrUsername").trim().notEmpty().withMessage("Email or Username is required"),
+
+    body("password").notEmpty().withMessage("Password is required"),
+    authvalidator
 ]
