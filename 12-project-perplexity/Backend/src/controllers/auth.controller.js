@@ -1,7 +1,7 @@
 import userModel from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import { sendEmail } from "../services/mail.service.js"
-
+import redis from "../config/cache.redis.js"
 // register controller
 export async function registerController(req,res){
     const {username,email,password}=req.body
@@ -137,7 +137,7 @@ res.status(200).json({
 
 //getme controllers
 export async function getMeController(req,res){
-    console.log(req.user.id)
+    
     try{
         const user=await userModel.findById(req.user.id).select("-password")
         if(!user){
@@ -149,6 +149,85 @@ export async function getMeController(req,res){
         res.status(200).json({
             success:true,
             user
+        })
+    }
+    catch(err){
+        return res.status(500).json({
+            success:false,
+            message:err.message
+        })
+    }
+}
+
+//refreshpage controller
+export async function refreshPageController(req,res){
+    try{
+
+        const refreshToken=req.cookies.refreshToken
+        if(!refreshToken){
+            return res.status(401).json({
+                success:false,
+                message:"refresh token missing"
+            })
+        }
+        
+        const isRefreshBlacklisted=await redis.get(`refresh:${refreshToken}`)
+        if(isRefreshBlacklisted){
+            return res.status(401).json({
+                success:false,
+                message:"Refresh token blacklisted"
+            })
+        }
+
+        const decoded=jwt.verify(refreshToken,process.env.REFRESH_JWT)
+
+        const user=await userModel.findById(decoded.id)
+
+        if(!user){
+             return res.status(404).json({
+                success:false,
+                message:"user not found"
+            })
+        }
+
+        const newAccessToken=jwt.sign({
+            id:user._id,
+            username:user.username
+        },process.env.ACCESS_JWT,{expiresIn:"1h"})
+        res.cookie("accessToken",newAccessToken,{httpOnly:true,secure:false,sameSite:"strict"})
+
+        return res.status(200).json({
+            success:true,
+            message:"Access token refreshed"
+        })
+    }
+catch(err){
+    return res.status(401).json({
+        success:false,
+        message:"Refresh token expired.Login again",
+        err:err.message
+    })
+}
+}
+
+export async function logoutController(req,res){
+    try{
+        const accessToken=req.cookies.accessToken
+        const refreshToken=req.cookies.refreshToken
+
+        if(accessToken){
+            await redis.set(`access:${accessToken}`,"blacklisted","EX",60*60)
+        }
+
+          if(refreshToken){
+            await redis.set(`refresh:${refreshToken}`,"blacklisted","EX",60*60*24*7)
+        }
+        res.clearCookie("accessToken")
+        res.clearCookie("refreshToken")
+
+        return res.status(200).json({
+            success:true,
+            message:"logged out sucessfully"
         })
     }
     catch(err){
