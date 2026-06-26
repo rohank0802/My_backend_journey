@@ -22,7 +22,7 @@ export async function registerController(req,res){
 
     const emailVerificationToken=jwt.sign({
         email:user.email
-    },process.env.JWT_SECRET,{expiresIn:"1d"})
+    },process.env.JWT_SECRET,{expiresIn:"1h"})
 
     await sendEmail({
         to:email,
@@ -56,11 +56,19 @@ try{
             err:"user not found"
         })
     }
+    if(user.verified){
+       return res.send(`
+        <h1>Email already verified </h1>
+        <p>Your email is has already been verified</p>
+        <a href="http://localhost:5173/login"> Go to Login</a>
+        `)
+    }
     user.verified=true;
     await user.save()
    return res.send(`
         <h1>Email verified successfully</h1>
         <p>Your email has been verified.You can now login to your account</p>
+         <a href="http://localhost:5173/login"> Go to Login</a>
         `)
 }
 catch(err){
@@ -148,6 +156,7 @@ export async function getMeController(req,res){
         }
         res.status(200).json({
             success:true,
+            message:"logged in successfully",
             user
         })
     }
