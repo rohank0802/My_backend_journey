@@ -5,14 +5,16 @@ import { NavLink } from 'react-router-dom'
 
 import {useNavigate} from "react-router-dom"
 import { useAuth } from '../hook/useAuth.js'
-
+import { Navigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 const Login = () => {
     const [formLoginData,setFormLoginData]=useState({
         emailOrUsername:"",
         password:""
     })
   const {handleLogin}=useAuth() 
-
+const user=useSelector(state=>state.auth.user)
+const loading=useSelector(state=>state.auth.loading)
  const navigate=useNavigate()
 
     function handleChange(e){
@@ -41,13 +43,14 @@ if(success){
     navigate("/")
 }
 
+    setFormLoginData({
+        emailOrUsername:"",
+        password:""
+    })
 
-
-    // setFormLoginData({
-    //     emailOrUsername:"",
-    //     password:""
-    // })
-
+    }
+    if(!loading && user){
+        return <Navigate to="/" replace/>
     }
   return (
     <main className="min-h-screen flex items-center justify-center bg-black p-6">
