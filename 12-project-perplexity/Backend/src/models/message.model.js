@@ -17,6 +17,6 @@
     },
  },{timestamps:true})
 
- const chatModel=mongoose.model("message",messageSchema)
+ const messageModel=mongoose.model("message",messageSchema)
 
- export default chatModel
+ export default messageModel
