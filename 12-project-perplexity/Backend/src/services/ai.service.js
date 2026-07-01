@@ -15,6 +15,7 @@ const mistralModel=new ChatMistralAI({
 
 export async function generateResponse(messages){
 try{
+  console.log(messages)
 const response = await geminiModel.invoke(messages.map(msg=>{
   if(msg.role==="user"){
     return new HumanMessage(msg.content)
@@ -29,6 +30,7 @@ return response.text
 }
 catch(err){
 console.log(err.message,"ai.service page")
+throw err
 }
 }
 
@@ -50,5 +52,6 @@ try{
 }
 catch(err){
   console.log(err.message)
+  throw err
 }
 }
