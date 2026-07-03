@@ -60,9 +60,9 @@ if(success){
             <form className="space-y-4" onSubmit={handleSubmit}>
               <input className="w-full px-4 py-2 bg-neutral-800 text-slate-100 border border-slate-800 rounded-md placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-red-400" type="text" name='emailOrUsername' placeholder='Enter your email/username' value={formLoginData.emailOrUsername} onChange={handleChange} autoComplete='username' />
                 <input className="w-full px-4 py-2 bg-neutral-800 text-slate-100 border border-slate-800 rounded-md placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-red-400" type="password" name='password' placeholder='Enter your password' value={formLoginData.password} onChange={handleChange} autoComplete='password' />
-                <button className="w-full bg-red-700 text-white py-2 rounded-md hover:bg-red-800 transition shadow-sm" type='submit'>Login</button>
+                <button className="w-full bg-[#6D5EF9] text-white py-2 rounded-md hover:bg-[#7B6DFF] transition shadow-sm" type='submit'>Login</button>
             </form>
-             <p className="text-sm text-center text-slate-300 mt-4">dont,t have account <NavLink className="text-red-300 font-medium" to="/register"><span>Register</span></NavLink></p>
+             <p className="text-sm text-center text-slate-300 mt-4">dont,t have account <NavLink className="text-[#7B6DFF] font-medium" to="/register"><span>Register</span></NavLink></p>
         </div>
     </main>
   )

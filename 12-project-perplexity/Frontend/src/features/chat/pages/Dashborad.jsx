@@ -1,30 +1,28 @@
 import React,{useEffect} from 'react'
 import { useSelector } from 'react-redux'
 import {useAuth} from "../../auth/hook/useAuth.js"
-  import { useNavigate } from 'react-router-dom'  
+  
 import { useChat } from '../hooks/usechat.js'
+import Sidebar from '../components/Sidebar.jsx'
+import ChatArea from '../components/ChatArea.jsx'
 
 
 const Dashborad = () => {
   const chat=useChat()
     const {handleLogout}=useAuth()
-    const navigate=useNavigate()
 const {user}=useSelector(state=>state.auth)
 console.log(user)
-async function logout(){
-     const success=await handleLogout()
-     if(success){
-        navigate("/login")
-     }
-}
 useEffect(()=>{
 chat.initializeSocketConnection()
+chat.handleGetChats()
 },[])
   return (
-    <div>
-      <button onClick={logout}>Logout</button>
-    </div>
+    <main className='h-screen bg-[#0B0B0F] text-white flex overflow-hidden'>
+     <Sidebar/>
+     <ChatArea/>
+    </main>
   )
 }
 
 export default Dashborad
+

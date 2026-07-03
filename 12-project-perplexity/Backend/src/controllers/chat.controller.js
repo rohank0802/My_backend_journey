@@ -41,6 +41,7 @@ export async function sendMessage(req,res){
         await session.commitTransaction()
         res.status(200).json({
             success:true,
+            chat,
             aiMessage
         })   
     }
