@@ -8,7 +8,7 @@ const api=axios.create({
 export  const sendMessage=async({message,chatId})=>{
     try{
 
-        const response=await api.post("/chat/message",{message,chatId})
+        const response=await api.post("/chat/message",{message,chat:chatId})
         return response.data
     }
     catch(err){
@@ -39,9 +39,11 @@ export  const getMessages=async(chatId)=>{
     }
 }
 
-export  const deleteChat=async({chatId})=>{
+export  const deleteChat=async(chatId)=>{
+    console.log(chatId)
     try{
         const response=await api.delete(`/chat/deleteChat/${chatId}`)
+        console.log(response)
         return response.data
     }
     catch(err){

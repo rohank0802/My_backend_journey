@@ -1,10 +1,11 @@
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
-import {HumanMessage,SystemMessage,AIMessage} from "langchain"
+import {HumanMessage,SystemMessage,AIMessage,tool,createAgent} from "langchain"
 import { ChatMistralAI } from "@langchain/mistralai"
-
+import * as z from "zod"
+import { searchInternet } from "./internet.service.js";
 
 const geminiModel = new ChatGoogleGenerativeAI({
-  model: "gemini-2.5-flash-lite",
+  model: "gemini-3.1-flash-lite",
   apiKey: process.env.GOOGLE_GEMINI_API_KEY
 });
 
@@ -13,19 +14,43 @@ const mistralModel=new ChatMistralAI({
   apiKey:process.env.MISTRAL_API_KEY
 })
 
+const searchInternetTool=tool(
+  searchInternet,
+  {
+    name:"searchInternet",
+    description:"Use this tool to get the latest information from the internet.",
+    schema:z.object({
+      query:z.string().describe("The search query to look up on the internet")
+    })
+  }
+)
+const agent=createAgent({
+  model:geminiModel,
+  tools:[searchInternetTool],
+})
+
 export async function generateResponse(messages){
 try{
   console.log(messages)
-const response = await geminiModel.invoke(messages.map(msg=>{
-  if(msg.role==="user"){
-    return new HumanMessage(msg.content)
-  }
-  else if(msg.role==="ai"){
-    return new AIMessage(msg.content)
-  }
-}));
+const response = await agent.invoke({
+  messages:[
+    new SystemMessage(`
+      You are a helpful and precise assistant for answering question.
+      If you don,t know the aswer,say you don,t know.
+      if the question requires up-to-date information,use the "searchInternet" tool to get the latest information from the internet and then aswer based on the search results.
+      `),
+      ...messages.map(msg=>{
+        if(msg.role=="user"){
+      return new HumanMessage(msg.content)
+    }
+    else if(msg.role=="ai"){
+      return new HumanMessage(msg.content)
+    }
+      })
+  ]
+});
 
-return response.text
+return response.messages[response.messages.length-1].text
 
 }
 catch(err){

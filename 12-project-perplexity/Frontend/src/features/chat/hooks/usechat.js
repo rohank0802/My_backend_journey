@@ -11,25 +11,29 @@ export  function useChat(){
         dispatch(setisLoading(true))
         try{
             const data=await sendMessage({message,chatId})
+            console.log(data)
         const {chat,aiMessage}=data
+        console.log(aiMessage)
+        if(!chatId){
             dispatch(createNewChat({
-                chatId:chat._id,
+                chatId:chatId||chat._id,
                 title:chat.title,
             }))
-        
-        
+        }
+
         dispatch(addNewMessage({
-            chatId:chat._id,
+            chatId:chatId||chat._id,
             content:message,
             role:"user"
         }))
         
         dispatch(addNewMessage({
-            chatId:chat._id,
+            chatId:chatId||chat._id,
             content:aiMessage[0].content,
             role:aiMessage[0].role
         }))
-      
+      console.log("chat",chats)
+      console.log("chatid",chat._id)
         dispatch(setCurrentChatId(chat._id))
         console.log(chat._id)
         }
@@ -48,7 +52,6 @@ export  function useChat(){
         try{
          const data=await getChats()
          const{chats}=data
-         console.log(chats)
          dispatch(setChats(chats.reduce((acc,chat)=>{
             acc[chat._id]={
                 id:chat._id,
@@ -71,19 +74,21 @@ export  function useChat(){
     }
 
     async function handleOpenChat(chatId){
-        console.log(chatId)
-     dispatch(setisLoading(true))
-     try{
-       const data=await getMessages(chatId)
-       const {messages}=data
-       console.log(messages)
-       const formatedMessages=messages.map(msg=>({content:msg.content,
-        role:msg.role
-       }))
-       dispatch(addMessages({
-        chatId,
-        messages:formatedMessages
-       }))
+        dispatch(setisLoading(true))
+        try{
+         if(chats[chatId]?.messages.length===0){
+   
+             const data=await getMessages(chatId)
+             const {messages}=data
+             console.log(messages)
+             const formatedMessages=messages.map(msg=>({content:msg.content,
+              role:msg.role
+             }))
+             dispatch(addMessages({
+              chatId,
+              messages:formatedMessages
+             }))
+         }
        dispatch(setCurrentChatId(chatId))
      }
        catch(err){
@@ -96,8 +101,23 @@ export  function useChat(){
         }
      
     }
+    async function handleDeleteChat(chatId){
+        dispatch(setisLoading(true))
+        try{
+      const data=await deleteChat(chatId)
+      console.log(data)
+        }
+ catch(err){
+            dispatch(setError(err.message))
+      console.log(err)
+      console.log(err.message)
+        }
+        finally{
+            dispatch(setisLoading(false))
+        }
+    }
 
 return{
-    initializeSocketConnection,handleSendMessage,handleGetChats,handleOpenChat
+    initializeSocketConnection,handleSendMessage,handleGetChats,handleOpenChat,handleDeleteChat
 }
 }

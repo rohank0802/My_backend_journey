@@ -1,35 +1,23 @@
-// function MessageBubble({ role, content }) {
-//   const isUser = role === "user";
 
-//   return (
-//     <div
-//       className={`flex ${
-//         isUser ? "justify-end" : "justify-start"
-//       }`}
-//     >
-//       <div
-//         className={`max-w-2xl rounded-3xl px-6 py-4 leading-7 ${
-//           isUser
-//             ? "bg-[#6D5EF9] text-white"
-//             : "bg-[#171720] border border-[#2C2C35] text-gray-200"
-//         }`}
-//       >
-//         {content}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default MessageBubble;
-
-
-
-
+import { useEffect } from "react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-function MessageBubble({ role, content }) {
+function MessageBubble({ role, content,isThinking=false }) {
   const isUser = role === "user";
+  const [dots,setDots]=useState("")
+
+  useEffect(()=>{
+if(!isThinking)return;
+const interval =setInterval(()=>{
+    setDots((prev)=>{
+        if(prev.length===3)return ""
+        return prev+"."
+    })
+},400)
+ return ()=>clearInterval(interval)
+  },[isThinking])
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
@@ -40,7 +28,7 @@ function MessageBubble({ role, content }) {
             : "bg-[#171720] border border-[#2C2C35] text-gray-200"
         }`}
       >
-        {isUser ? (
+        {isThinking?(<p className="italic text-gray-400">Thinking{dots}</p>):isUser ? (
           <p>{content}</p>
         ) : (
           <ReactMarkdown

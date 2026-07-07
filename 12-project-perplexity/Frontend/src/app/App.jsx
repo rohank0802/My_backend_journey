@@ -8,7 +8,8 @@ function App() {
 const auth=useAuth()
 
 useEffect(()=>{
-auth.handleGetMe()
+  auth.handleGetMe()
+  console.log("app.jsx")
 },[])
  return(
   <>
