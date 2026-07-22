@@ -1,0 +1,45 @@
+/* CodeBlock component styles */
+.cb-wrap {
+  position: relative;
+  background: #050505;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 6px 0;
+}
+.cb-copy {
+  position: absolute;
+  top: 8px; right: 8px;
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text2);
+  font-size: 11px;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s;
+  z-index: 1;
+}
+.cb-copy:hover { background: var(--surface3); color: var(--text); }
+.cb-copy .material-symbols-outlined { font-size: 14px !important; }
+.cb-pre {
+  padding: 12px 8px 12px 0;
+  margin: 0;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  color: #cdd6f4;
+}
+.cb-line { display: flex; }
+.cb-ln { min-width: 40px; padding: 0 12px; color: #4a4a6a; text-align: right; user-select: none; flex-shrink: 0; }
+.cb-lc { flex: 1; white-space: pre; }
+
+/* Syntax token colours (Catppuccin Mocha palette) */
+.cb-keyword { color: #cba6f7; } /* purple  */
+.cb-func    { color: #89dceb; } /* sky     */
+.cb-string  { color: #a6e3a1; } /* green   */
+.cb-number  { color: #fab387; } /* peach   */
+.cb-comment { color: #585b70; font-style: italic; } /* overlay */

@@ -1,0 +1,18 @@
+/* UserMessage component styles */
+.um-wrap { display: flex; align-items: flex-start; gap: 12px; }
+.um-avatar {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex; align-items: center; justify-content: center;
+  color: #000;
+}
+.um-avatar .material-symbols-outlined { font-size: 20px !important; }
+.um-bubble {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  border-top-left-radius: 0;
+  padding: 12px 16px;
+  max-width: 600px;
+}
+.um-text { font-size: 14px; color: var(--text); line-height: 1.6; }
