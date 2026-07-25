@@ -2,10 +2,11 @@ import {StateGraph, StateSchema,START ,END,type GraphNode,} from "@langchain/lan
 import z from "zod"
 import {mistralModel,cohereModel,geminiModel} from"./model.ai.js"
 import {createAgent,HumanMessage,providerStrategy} from "langchain"
-
+import {tavilyTool} from "./interner.services.js"
 const state=new StateSchema({
 
     problem:z.string().default(""),
+    route:z.enum(["WEB","NO_WEB"]).default("NO_WEB"),
     solution_1:z.string().default(""),
     solution_2:z.string().default(""),
     judge:z.object({
@@ -15,8 +16,34 @@ const state=new StateSchema({
         solution_2_reasoning:z.string().default("")
     })
 })
+//RouterNode
+const routerNode:GraphNode<typeof state>=async(state)=>{
+    const router=createAgent({
+        model:geminiModel,
+        tools:[],
+        responseFormat:providerStrategy(
+            z.object({
+                route:z.enum(["WEB","NO_WEB"]),
+            })
+        ),
+       systemPrompt:`You are a routing AI.
+       If the user,s question requires current information,
+       latest news,weather,sports scores,stock prices,or anything from the internet,return WEB.
 
-const solutionNode: GraphNode<typeof state>=async(state)=>{
+       Otherwise return NO_WEB.
+       Return only the Routes
+       `,
+    })
+    const response=await router.invoke({
+        messages:[new HumanMessage(state.problem)],
+    });
+    return{
+        route:response.structuredResponse.route
+    }
+}
+
+
+const solutionNodeNoWeb: GraphNode<typeof state>=async(state)=>{
   const [mistralResponse,cohereResponse]=await Promise.all([
     mistralModel.invoke(state.problem),
     cohereModel.invoke(state.problem)
@@ -26,6 +53,36 @@ const solutionNode: GraphNode<typeof state>=async(state)=>{
     solution_2:cohereResponse.text,
   }
 }
+
+//solution node with websearch
+const mistralAgent=createAgent({
+    model:mistralModel,
+    tools:[tavilyTool],
+})
+
+const cohereAgent=createAgent({
+model:cohereModel,
+tools:[tavilyTool]
+})
+
+const solutionNodeWeb:GraphNode<typeof state>=async(state)=>{
+    const [mistralResponse,cohereResponse]=await Promise.all([
+        mistralAgent.invoke({
+            messages:[
+                new HumanMessage(state.problem),
+            ],
+        }),
+        cohereAgent.invoke({
+            messages:[new HumanMessage(state.problem)],
+        }),
+    ]);
+    return{
+        solution_1:mistralResponse.messages[mistralResponse.messages.length-1]?.text??"",
+
+        solution_2:cohereResponse.messages[cohereResponse.messages.length-1]?.text??""
+    }
+}
+
 
 const judgeNode: GraphNode <typeof state>=async(state)=>{
     const{problem , solution_1, solution_2}=state
@@ -66,10 +123,21 @@ const judgeNode: GraphNode <typeof state>=async(state)=>{
 }
 
 const graph=new StateGraph(state)
-.addNode("solution",solutionNode)
+.addNode("router",routerNode)
+.addNode("solutionWeb",solutionNodeWeb)
+.addNode("solutionNoWeb",solutionNodeNoWeb)
 .addNode("judgee",judgeNode)
-.addEdge(START,"solution")
-.addEdge("solution","judgee")
+.addEdge(START,"router")
+.addConditionalEdges(
+    "router",
+    (state)=>state.route,
+    {
+        WEB:"solutionWeb",
+        NO_WEB:"solutionNoWeb"
+    }
+)
+.addEdge("solutionWeb","judgee")
+.addEdge("solutionNoWeb","judgee")
 .addEdge("judgee",END)
 .compile()
 
