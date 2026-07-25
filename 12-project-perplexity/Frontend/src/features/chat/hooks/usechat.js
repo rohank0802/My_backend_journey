@@ -32,10 +32,7 @@ export  function useChat(){
             content:aiMessage[0].content,
             role:aiMessage[0].role
         }))
-      console.log("chat",chats)
-      console.log("chatid",chat._id)
-        dispatch(setCurrentChatId(chat._id))
-        console.log(chat._id)
+        dispatch(setCurrentChatId(chatId||chat?._id))
         }
         catch(err){
       dispatch(setError(err.response?.data?.message||err.message))
@@ -118,6 +115,7 @@ export  function useChat(){
     }
 
 return{
-    initializeSocketConnection,handleSendMessage,handleGetChats,handleOpenChat,handleDeleteChat
+      initializeSocketConnection,
+  handleSendMessage,handleGetChats,handleOpenChat,handleDeleteChat
 }
 }

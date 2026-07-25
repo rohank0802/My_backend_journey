@@ -121,7 +121,6 @@ useEffect(()=>{
               </button>
               <button onClick={()=>{
                 handleDeleteChat(chat.id)
-                console.log(chat.id)
               }}
               className="py-1 px-1.5 rounded-2xl bg-[#6D5EF9]">Delete</button>
             </div>
