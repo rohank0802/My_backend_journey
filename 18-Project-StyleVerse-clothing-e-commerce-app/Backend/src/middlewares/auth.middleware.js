@@ -2,8 +2,8 @@ import jwt from "jsonwebtoken";
 import {config} from "../config/config.js"
 export const authAccessUser=async(req,res,next)=>{
     try{
-        const accessToken=req.cookie.accessToken;
-
+        const accessToken=req.cookies.accessToken;
+  
         if(!accessToken){
             return res.status(401).json({
                 success:false,

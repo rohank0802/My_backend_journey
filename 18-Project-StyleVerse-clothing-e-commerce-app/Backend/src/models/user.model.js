@@ -54,7 +54,7 @@ userSchema.methods.comparePassword=function(userPassword){
 }
 //generating accessToken
 userSchema.methods.generateAccessToken=function(){
-    return JsonWebTokenError.sign({
+    return jwt.sign({
         id:this._id,
         email:this.email
     },config.ACCESS_JWT,{expiresIn:"15m"})
@@ -63,7 +63,7 @@ userSchema.methods.generateAccessToken=function(){
 userSchema.methods.generateRefreshToken=function(){
     return jwt.sign({
        id:this._id
-    },config.REFRESH_JWT,{expresIn:"7d"})
+    },config.REFRESH_JWT,{expiresIn:"7d"})
 }
 
 const userModel=mongoose.model("userDetails",userSchema)

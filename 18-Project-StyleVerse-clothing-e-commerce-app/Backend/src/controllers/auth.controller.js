@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 import {emailVerifyJwt} from "../config/config.js"
 import {sendEmail} from "../services/mail.service.js"
 import bcrypt from "bcrypt"
-import { config } from "dotenv";
+import { config } from "../config/config.js";
 
 
 
@@ -92,10 +92,10 @@ user.save()
 }
 
 //login controller
-async function loginControllerLocal(){
+async function loginControllerLocal(req,res){
     try{
 
-        const {email,contact}=req.body
+        const {email,contact,password}=req.body
         const user=await userModel.findOne({
             $or:[
                 {email},
@@ -116,7 +116,7 @@ async function loginControllerLocal(){
                 success:false,
             })
         }
-        if(!user.varified){
+        if(!user.verified){
              return res.status(400).json({
                 success:false,
                 message:"Please verify your email befor login",
@@ -138,9 +138,21 @@ async function loginControllerLocal(){
         //seding orignal refresh and acces token to browser
         res.cookie("refreshToken",refreshToken,{httpOnly:true,sameSite:"strict"})
         res.cookie("accessToken",accessToken,{httpOnly:true,sameSite:"strict"})
+
+        return res.status(200).json({
+            success:true,
+            message:"logged in successfully",
+            user:{
+                id:user._id,
+                fullname:user.fullName,
+                contact:user.contact,
+                email:user.email,
+                role:user.role
+            }
+        })
     }
     catch(error){
-        res.status(500),json({
+        res.status(500).json({
             success:false,
             message:"internal server error",
            error:error.message
@@ -150,9 +162,9 @@ async function loginControllerLocal(){
 
 
 // getme controller
-async function getMeController(){
+async function getMeController(req,res){
     try{
-        const user=await userModel.findbyId(req.user.id).select("-password -refreshToken");
+        const user=await userModel.findById(req.user.id).select("-password -refreshToken");
         if(!user){
             return res.status(404).json({
                 success:false,
@@ -173,16 +185,17 @@ async function getMeController(){
 }
 
 //refreshpage controller
-async function refreshPageController(){
+async function refreshPageController(req,res){
     try{
 
-        const refreshToken=req.cookes.refreshToken;
+        const refreshToken=req.cookies.refreshToken;
+       
         //verify jwt
-
         const decoded=jwt.verify(refreshToken,config.REFRESH_JWT)
+        console.log("config jwt",config.REFRESH_JWT)
 
         //finduser
-        const user =await userModel.findbyId(decoded.id).select("+refreshToken")
+        const user =await userModel.findById(decoded.id).select("+refreshToken")
 
         //Compare with hashed token in db
         const isMatched=await bcrypt.compare(
@@ -190,15 +203,13 @@ async function refreshPageController(){
         )
         if(!isMatched){
             throw new Error("Invalid refresh token")
-
         }
-
         //generate NEW token
         const newAccessToken=user.generateAccessToken();
         const newRefreshToken=user.generateRefreshToken();
 
         //hash new refresh token
-        const hashed=bcrypt.hash(newRefreshToken,10)
+        const hashed=await bcrypt.hash(newRefreshToken,10)
 
         //save new hash token
         user.refreshToken=hashed
@@ -207,10 +218,54 @@ async function refreshPageController(){
         //replace cookie
         res.cookie("accessToken",newAccessToken,{httpOnly:true,sameSite:"strict"});
         res.cookie("refreshToken",newRefreshToken,{httpOnly:true,sameSite:"strict"});
-
+  const safeUser=await userModel.findById(user._id)
+       return  res.status(200).json({
+          success:true,
+          message:"logged in successful",
+          safeUser
+         })
     }
     catch(error){
+       res.status(500).json({
+        success:false,
+        message:"internal server error",
+        error:error.message
+       })
+    }
+}
 
+//logout controller
+async function logoutController(req,res){
+    try{
+    const refreshToken=req.cookies.refreshToken;
+    const accessToken=req.cookies.accessToken
+
+    //verify access and refresh
+    const decoded1=jwt.verify(refreshToken,config.REFRESH_JWT)
+    const decoded2=jwt.verify(accessToken,config.ACCESS_JWT)
+
+    const user= await userModel.findById(decoded1.id).select("+refreshToken")
+
+    user.refreshToken=null
+    await user.save({validateBeforeSave:false})
+
+    res.clearCookie("accessToken",{
+        httpOnly:true,sameSite:"strict"
+    });
+    res.clearCookie("refreshToken",{
+            httpOnly:true,sameSite:"strict"
+        })
+        return res.status(200).json({
+            success:true,
+            message:"logged out successfully"
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:"internal server error",
+            error:error.message
+        })
     }
 }
 
@@ -219,5 +274,6 @@ export {
     verifyEmailController,
     loginControllerLocal,
     getMeController,
-    refreshPageController
+    refreshPageController,
+    logoutController
 }
