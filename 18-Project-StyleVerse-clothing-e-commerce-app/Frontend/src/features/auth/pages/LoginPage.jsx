@@ -3,7 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 
 // import { useAuth } from '../hook/useAuth.js'
 
-const Login = () => {
+const DEFAULT_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><rect width='100' height='100' rx='24' fill='%234F46E5'/><path d='M32 38C32 38 40 24 50 24C60 24 68 38 68 38' stroke='white' stroke-width='6' stroke-linecap='round'/><path d='M26 38H74L70 76C70 78.2091 68.2091 80 66 80H34C31.7909 80 30 78.2091 30 76L26 38Z' fill='white' fill-opacity='0.15' stroke='white' stroke-width='6' stroke-linejoin='round'/><path d='M43 48C43 51.866 46.134 55 50 55C53.866 55 57 51.866 57 48' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>"
+
+const LoginPage = () => {
 
     // ── Single combined form state object ─────────────────────────────────────
     // identifier = email OR phone number
@@ -74,7 +76,7 @@ const Login = () => {
           {/* Logo */}
           <div className="mb-5 flex justify-center">
             <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg p-1">
-              <img src="/styleverse-logo.png" alt="StyleVerse logo" className="w-full h-full object-contain" />
+              <img src="/styleverse-logo.png" onError={(e) => { e.currentTarget.src = DEFAULT_LOGO; }} alt="StyleVerse logo" className="w-full h-full object-contain" />
             </div>
           </div>
 
@@ -115,7 +117,7 @@ const Login = () => {
           {/* Mobile-only logo (left panel hidden on small screens) */}
           <div className="lg:hidden text-center mb-6">
             <div className="flex justify-center mb-2">
-              <img src="/styleverse-logo.png" alt="StyleVerse" className="w-12 h-12 object-contain" />
+              <img src="/styleverse-logo.png" onError={(e) => { e.currentTarget.src = DEFAULT_LOGO; }} alt="StyleVerse" className="w-12 h-12 object-contain" />
             </div>
             <h2 className="text-2xl font-bold text-indigo-800" style={{ fontFamily: 'Playfair Display, serif' }}>
               StyleVerse
@@ -244,5 +246,4 @@ const Login = () => {
     </div>
   )
 }
-
-export default Login
+export default LoginPage
