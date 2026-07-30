@@ -28,6 +28,8 @@ export const validateRegisterUserLocal=[
     .notEmpty().withMessage("Full name is required")
     .isLength({min:3}).withMessage("Fullname must be at least 3 character long"),
     validateRequest
+
+    
     
 ]
 export const loginValidatorLocal=[

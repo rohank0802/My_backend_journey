@@ -7,14 +7,10 @@ const userSchema=new mongoose.Schema({
         type:String, required:true, trim:true, unique:false},
     contact:{
            type:String,
-           required:true
+           required:true,
+           trim:true
     },
-    email:{
-        type:String,
-        required:true,
-        trim:true,
-        unique:true
-    },
+    email:{type:String, required:true, trim:true,unique:true,lowercase:true},
     password:{
         type:String,
         required:function(){
@@ -24,15 +20,8 @@ const userSchema=new mongoose.Schema({
         select:false
         
     },
-    refreshToken:{
-       type:String,
-       default:null,
-       select:false
-    },
-    verified:{
-       type:Boolean,
-       default:false
-    },
+    refreshToken:{type:String, default:null, select:false },
+    verified:{type:Boolean, default:false },
     role:{
         type:String,
         enum:["buyer","seller"],
