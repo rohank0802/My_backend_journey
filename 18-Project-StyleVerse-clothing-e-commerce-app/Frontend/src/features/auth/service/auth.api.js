@@ -1,17 +1,19 @@
 import axios from "axios";
 
-const API_URL=process.env.VITE_AUTH_URL;
+
 
 const authApi=axios.create({
-    baseURL:meta.env.VITE_AUTH_URL,
+    baseURL:"/api",
     withCredentials:true
 })
 
 export const registerUser=async(user)=>{
     try {
-        const res=await authApi.post("/register",user)
+        const res=await authApi.post("/auth/register",user)
+        
         return res.data;
     } catch (error) {
+      
         throw error;
     }
 }
@@ -19,16 +21,17 @@ export const registerUser=async(user)=>{
 
 export const LoginUser=async(user)=>{
     try {
-        const res=await authApi.post("/login",user)
+        const res=await authApi.post("/auth/login",user)
         return res.data;
     } catch (error) {
+        console.log(error)
         throw error;
     }
 }
 
 export const GetMeUser=async()=>{
     try {
-        const res=await authApi.get("/get-me")
+        const res=await authApi.get("/auth/get-me")
         return res.data;
     } catch (error) {
         throw error;
@@ -37,7 +40,7 @@ export const GetMeUser=async()=>{
 
 export const RefreshPageUser=async()=>{
     try{
-        const res=await authApi.get("/refresh-page")
+        const res=await authApi.get("/auth/refresh-page")
         return res.data;
     }catch(error){
         throw error;
@@ -46,7 +49,7 @@ export const RefreshPageUser=async()=>{
 
 export const LogoutUser=async()=>{
     try{
-        const res=await authApi.get("/logout")
+        const res=await authApi.get("/auth/logout")
         return res.data;
     }catch(error){
         throw error;

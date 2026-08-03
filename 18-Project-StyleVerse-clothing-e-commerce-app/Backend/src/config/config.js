@@ -14,7 +14,7 @@ export const config={
 
 //goolge mail services
 if(!process.env.GOOGLE_CLIENT_SECRET &&process.env.GOOGLE_CLIENT_ID &&process.env.GOOGLE_REFRESH_TOKEN &&process.env.GOOGLE_USER){
- throw new Error("GOOGLE MAIL URI's is not defined in environmental variables")
+ throw new Error("client id and client secret is  is not defined in environmental variables")
 }
 
 export const mainConfig={

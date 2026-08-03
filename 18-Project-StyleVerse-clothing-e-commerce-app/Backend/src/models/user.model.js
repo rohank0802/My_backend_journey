@@ -38,7 +38,7 @@ userSchema.pre("save",async function(){
     this.password=await bcrypt.hash(this.password,10)
 })
 
-userSchema.methods.comparePassword=function(userPassword){
+userSchema.methods.comparePassword=async function(userPassword){
  return bcrypt.compare(userPassword,this.password)
 }
 //generating accessToken

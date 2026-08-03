@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { setUser,setError,setLoading } from "../auth.slice.js";
 
-import { RefreshPageUser,getMeUser,registerUser,LoginUser,LogoutUser } from "../service/auth.api.js";
+import { RefreshPageUser,GetMeUser,registerUser,LoginUser,LogoutUser } from "../service/auth.api.js";
 
 export const useAuth=()=>{
     const dispatch=useDispatch()
@@ -10,9 +10,11 @@ async function handleRegister(user){
     try{
         dispatch(setLoading(true))
         const data=await registerUser(user)
-        dispatch(setUser(data))
+        dispatch(setUser(data.message))
+        console.log(data.message)
     }catch(error){
-        dispatch(setError(error))
+        
+        dispatch(setError(error.response?.data?.message||error.message))
     }
     finally{
         dispatch(setLoading(false))
@@ -23,9 +25,10 @@ async function handleLogin(user){
     try{
         dispatch(setLoading(true))
         const data=await LoginUser(user)
-        dispatch(setUser(data))
+        dispatch(setUser(data.user))
+        console.log(data.user)
     }catch(error){
-        dispatch(setError(error))
+        dispatch(setError(error.response?.data?.message||error))
     }
     finally{
         dispatch(setLoading(false))
@@ -45,17 +48,19 @@ async function handleLogout(){
     }
 }
 
-async function getMeUser(){
+async function handlegetMeUser(){
     try{
         dispatch(setLoading(true))
-        const data=await getMeUser()
-        dispatch(setUser(data))
+        const data=await GetMeUser()
+        dispatch(setUser(data.user))
+        console.log(data.user)
     }catch(error){
         if(error.response.status==401){
           try{
             await RefreshPageUser()
             const data=await getMeUser()
-            dispatch(setUser(data))
+            dispatch(setUser(data.user))
+            console.log(data.user)
           }catch(error){
             dispatch(setUser(null))
           }
@@ -72,7 +77,7 @@ return{
     handleLogin,
     handleLogout,
     handleRegister,
-    getMeUser
+    handlegetMeUser
 }
 
 }

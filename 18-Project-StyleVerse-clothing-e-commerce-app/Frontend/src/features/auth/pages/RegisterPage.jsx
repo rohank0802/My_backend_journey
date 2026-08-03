@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-
+import { useAuth } from "../hook/useAuth.js"
 const DEFAULT_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><rect width='100' height='100' rx='24' fill='%234F46E5'/><path d='M32 38C32 38 40 24 50 24C60 24 68 38 68 38' stroke='white' stroke-width='6' stroke-linecap='round'/><path d='M26 38H74L70 76C70 78.2091 68.2091 80 66 80H34C31.7909 80 30 78.2091 30 76L26 38Z' fill='white' fill-opacity='0.15' stroke='white' stroke-width='6' stroke-linejoin='round'/><path d='M43 48C43 51.866 46.134 55 50 55C53.866 55 57 51.866 57 48' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>"
 
 const RegisterPage = () => {
 
+  const {handleRegister}=useAuth()
   // ── Single combined form state object ─────────────────────────────────────
   const [formData, setFormData] = useState({
     fullName: '',
@@ -40,9 +41,10 @@ const RegisterPage = () => {
     setError('')
 
     try {
+      await handleRegister(formData)
       
       setSuccess('Account created! Redirecting...')
-      setTimeout(() => navigate('/login'), 1500)
+      // setTimeout(() => navigate('/login'), 1500)
     } catch (err) {
       setError(err?.response?.data?.message || 'Registration failed. Please try again.')
     } finally {
@@ -122,6 +124,11 @@ const RegisterPage = () => {
             <p className="text-slate-500 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
               Join StyleVerse today — it's free!
             </p>
+          </div>
+
+          
+          <div className="mb-5 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold rounded-lg cursor-pointer flex justify-center">
+            <a href="/api/auth/google" className='px-4 py-2 text-sm placeholder-slate-400 focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition-all duration-200' style={{ fontFamily: 'Inter, sans-serif' }}>Continue with google</a>
           </div>
 
           {/* Error / Success alerts */}

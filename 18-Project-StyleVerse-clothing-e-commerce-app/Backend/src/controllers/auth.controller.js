@@ -42,12 +42,18 @@ const emailVerificationToken=jwt.sign({
     })
     return res.status(201).json({
         success:true,
-        message:"user registration successfull"
+        message:"user registration successfull.Please verify your email before login,Verification email is sent to your  register Email Id."
     })
 }
-catch(err){
-console.log(err)
-return res.status(500).json({message:"server error"})
+catch(error){
+
+return res.status(500).json(
+    {
+        message:"server error",
+        success:false,
+        error:error.message
+
+    })
 }
 }
 
@@ -81,14 +87,20 @@ user.save()
         `)
     
     }
-    catch(err){
-        console.log(err.message)
-   return res.status(200).json({
+    catch(error){
+       
+   return res.status(500).json({
         success:false,
         message:"server error",
-        err:err.message
+        error:error.message
     })
     }
+}
+
+//google callback
+const googleCallback=async(req,res)=>{
+    console.log(req.user)
+    res.redirect("http://localhost:5173/")
 }
 
 //login controller
@@ -109,7 +121,7 @@ async function loginControllerLocal(req,res){
                 err:"User not found"
             })
         }
-        const matchPassword=user.comparePassword(password)
+        const matchPassword= await user.comparePassword(password)
         if(!matchPassword){
             return res.status(400).json({
                 message:"Invalid credentials",
@@ -154,8 +166,8 @@ async function loginControllerLocal(req,res){
     catch(error){
         res.status(500).json({
             success:false,
-            message:"internal server error",
-           error:error.message
+            message:`internal server error :${error.message}`,
+          
         })
     }
 }
@@ -275,5 +287,6 @@ export {
     loginControllerLocal,
     getMeController,
     refreshPageController,
-    logoutController
+    logoutController,
+    googleCallback
 }
