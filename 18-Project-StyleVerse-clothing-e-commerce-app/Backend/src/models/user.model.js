@@ -7,7 +7,9 @@ const userSchema=new mongoose.Schema({
         type:String, required:true, trim:true, unique:false},
     contact:{
            type:String,
-           required:true,
+           required:function(){
+            return this.provider==="local"
+           },
            trim:true
     },
     email:{type:String, required:true, trim:true,unique:true,lowercase:true},
@@ -28,6 +30,7 @@ const userSchema=new mongoose.Schema({
         default:"buyer"
     },
     provider:{type:String,enum:["local","google"],default:"local"},
+
     googleId:{
         type:String,default:null
     }

@@ -99,8 +99,59 @@ user.save()
 
 //google callback
 const googleCallback=async(req,res)=>{
-    console.log(req.user)
-    res.redirect("http://localhost:5173/")
+
+    try{
+
+        const {id,displayName,emails,photos}=req.user
+        const email=emails[0].value
+        const profilePic=photos[0].value
+    
+        let user=await userModel.findOne({
+            email
+        })
+        if(!user){
+            user=await userModel.create({
+                fullName:displayName,
+                email,
+                provider:"google",
+                googleId:id,
+                
+                verified:true
+            })
+        }
+        //if user already exists but registered locally
+        else{
+          //linked google acc if not linked already
+          if(!user.googleId){
+            user.googleId=id
+          }
+          //marked verified beacuse google verifies email
+          user.verified=true
+          await user.save({
+            validateBeforeSave:false
+          })
+        }
+        const accessToken=user.generateAccessToken()
+        const refreshToken=user.generateRefreshToken()
+    
+          const hashedRefreshToken=await bcrypt.hash(refreshToken,10);
+            
+            //storing only hashed refreh in db
+            user.refreshToken=hashedRefreshToken
+            await user.save({
+                validateBeforeSave:false
+            })
+    
+         res.cookie("refreshToken",refreshToken,{httpOnly:true,sameSite:"strict",maxAge:7*24*60*1000})
+         res.cookie("accessToken",accessToken,{httpOnly:true,sameSite:"strict",maxAge:15*60*1000})
+       return res.redirect("http://localhost:5173/")
+    }
+    catch(error){
+        return res.status(500).json({
+            success:false,
+            message:"Google authentication failed"
+        })
+    }
 }
 
 //login controller
@@ -148,8 +199,8 @@ async function loginControllerLocal(req,res){
         })
         
         //seding orignal refresh and acces token to browser
-        res.cookie("refreshToken",refreshToken,{httpOnly:true,sameSite:"strict"})
-        res.cookie("accessToken",accessToken,{httpOnly:true,sameSite:"strict"})
+        res.cookie("refreshToken",refreshToken,{httpOnly:true,sameSite:"strict",maxAge:7*24*60*1000})
+        res.cookie("accessToken",accessToken,{httpOnly:true,sameSite:"strict",maxAge:15*60*1000})
 
         return res.status(200).json({
             success:true,
@@ -204,7 +255,7 @@ async function refreshPageController(req,res){
        
         //verify jwt
         const decoded=jwt.verify(refreshToken,config.REFRESH_JWT)
-        console.log("config jwt",config.REFRESH_JWT)
+       
 
         //finduser
         const user =await userModel.findById(decoded.id).select("+refreshToken")
@@ -228,8 +279,8 @@ async function refreshPageController(req,res){
         await user.save({velidateBeforeSave:false})
 
         //replace cookie
-        res.cookie("accessToken",newAccessToken,{httpOnly:true,sameSite:"strict"});
-        res.cookie("refreshToken",newRefreshToken,{httpOnly:true,sameSite:"strict"});
+        res.cookie("accessToken",newAccessToken,{httpOnly:true,sameSite:"strict",maxAge:15*60*1000});
+        res.cookie("refreshToken",newRefreshToken,{httpOnly:true,sameSite:"strict",maxAge:7*24*60*1000});
   const safeUser=await userModel.findById(user._id)
        return  res.status(200).json({
           success:true,

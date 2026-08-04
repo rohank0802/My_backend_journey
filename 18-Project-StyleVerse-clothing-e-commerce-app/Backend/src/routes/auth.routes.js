@@ -3,13 +3,18 @@ import {validateRegisterUserLocal,loginValidatorLocal} from "../validators/auth.
 import { registerLocal,verifyEmailController,loginControllerLocal,getMeController,refreshPageController,logoutController,googleCallback} from "../controllers/auth.controller.js"
 import {authAccessUser} from "../middlewares/auth.middleware.js"
 import passport from "passport"
+import { config } from "../config/config.js"
+
+
 const authRouter=Router()
 
 
 authRouter.post("/register",validateRegisterUserLocal,registerLocal)
 authRouter.get("/verify-email",verifyEmailController)
 authRouter.get("/google",passport.authenticate("google",{scope:["profile","email"]}))
-authRouter.get("/google/callback",passport.authenticate("google",{session:false,failureRedirect:"/login"}),googleCallback)
+authRouter.get("/google/callback",passport.authenticate("google",{session:false,failureRedirect:config.NODE_ENV==="development"?"http://localhost:5173/login":"/login"}),googleCallback)
+
+
 //login controller
 authRouter.post("/login",loginValidatorLocal,loginControllerLocal)
 //getme controller

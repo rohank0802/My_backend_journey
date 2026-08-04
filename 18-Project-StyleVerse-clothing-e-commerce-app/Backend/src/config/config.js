@@ -9,7 +9,8 @@ if(!process.env.MONGO_URI){
 export const config={
     MONGO_URI:process.env.MONGO_URI,
     ACCESS_JWT:process.env.ACCESS_JWT,
-    REFRESH_JWT:process.env.REFRESH_JWT
+    REFRESH_JWT:process.env.REFRESH_JWT,
+    NODE_ENV:process.env.NODE_ENV
 }
 
 //goolge mail services
