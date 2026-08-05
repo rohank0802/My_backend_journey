@@ -1,13 +1,10 @@
-import userModel from "../models/user.model.js";
 import jwt from "jsonwebtoken"
+import userModel from "../models/user.model.js"
+import { sendEmail } from "../services/mail.service.js"
 import {emailVerifyJwt} from "../config/config.js"
-import {sendEmail} from "../services/mail.service.js"
 import bcrypt from "bcrypt"
-import { config } from "../config/config.js";
 
-
-
-const registerLocal=async(req,res)=>{
+const sellerRegisterController=async(req,res)=>{
 const {email,contact,password,fullName}=req.body
 
 try{
@@ -23,7 +20,7 @@ if(existingUser){
     })
 }
 
-const user=await userModel.create({email,contact,password,fullName})
+const user=await userModel.create({email,contact,password,fullName,role:"seller"})
 
 const emailVerificationToken=jwt.sign({
     email:user.email
@@ -36,7 +33,7 @@ const emailVerificationToken=jwt.sign({
         html:`<p>Hi ${fullName},</p>
         <p>Thank you from registring at <strong>StyleVerse</strong>.We're  We're excited to have you on board!</p>
         <p>Please verify your email address by clicking the link below</p>
-          <a href="http://localhost:3000/api/auth/verify-email?token=${emailVerificationToken}">Verify Email</a>
+          <a href="http://localhost:3000/api/auth/seller/verify-email?token=${emailVerificationToken}">Verify Email</a>
           <p>If you did not create an account, please ignore this email.</p>
         <p>Best regards,<br>The StyleVerse Team</p>`
     })
@@ -58,71 +55,7 @@ return res.status(500).json(
 }
 
 
-
-const googleCallback=async(req,res)=>{
-
-    try{
-
-        const {id,displayName,emails,photos}=req.user
-        const email=emails[0].value
-        const profilePic=photos[0].value
-    
-        let user=await userModel.findOne({
-            email
-        })
-        if(user && user.role !=="buyer"){
-            return res.status(403).json({
-                success:false,
-                message:"This account is registeres as a seller"
-            })
-        }
-        if(!user){
-            user=await userModel.create({
-                fullName:displayName,
-                email,
-                provider:"google",
-                googleId:id,
-                
-                verified:true
-            })
-        }
-        //if user already exists but registered locally
-        else{
-          //linked google acc if not linked already
-          if(!user.googleId){
-            user.googleId=id
-          }
-          //marked verified beacuse google verifies email
-          user.verified=true
-          await user.save({
-            validateBeforeSave:false
-          })
-        }
-        const accessToken=user.generateAccessToken()
-        const refreshToken=user.generateRefreshToken()
-    
-          const hashedRefreshToken=await bcrypt.hash(refreshToken,10);
-            
-            //storing only hashed refreh in db
-            user.refreshToken=hashedRefreshToken
-            await user.save({
-                validateBeforeSave:false
-            })
-    
-         res.cookie("refreshToken",refreshToken,{httpOnly:true,sameSite:"strict",maxAge:7*24*60*1000})
-         res.cookie("accessToken",accessToken,{httpOnly:true,sameSite:"strict",maxAge:15*60*1000})
-       return res.redirect("http://localhost:5173/")
-    }
-    catch(error){
-        return res.status(500).json({
-            success:false,
-            message:"Google authentication failed"
-        })
-    }
-}
-
-//login controller
-async function loginControllerLocal(req,res){
+async function sellerloginController(req,res){
     try{
 
         const {email,contact,password}=req.body
@@ -139,10 +72,10 @@ async function loginControllerLocal(req,res){
                 err:"User not found"
             })
         }
-        if(user.role !=="buyer"){
+        if(user.role !=="seller"){
             return res.status(403).json({
                 success:false,
-                message:"this is not a valid i"
+                message:"this is not a seller account"
             })
         }
         const matchPassword= await user.comparePassword(password)
@@ -196,11 +129,7 @@ async function loginControllerLocal(req,res){
     }
 }
 
+export {sellerRegisterController,
+    sellerloginController
 
-
-
-export {
-    registerLocal,
-    loginControllerLocal,
-    googleCallback
 }

@@ -1,26 +1,26 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../hook/useAuth.js'
-import ContinueWithGoogle from '../components/ContinueWithGoogle.jsx'
+import { useAuth } from '../../hook/useAuth.js'
+import ContinueWithGoogle from '../../components/ContinueWithGoogle.jsx'
 // import { useAuth } from '../hook/useAuth.js'
 
 const DEFAULT_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><rect width='100' height='100' rx='24' fill='%234F46E5'/><path d='M32 38C32 38 40 24 50 24C60 24 68 38 68 38' stroke='white' stroke-width='6' stroke-linecap='round'/><path d='M26 38H74L70 76C70 78.2091 68.2091 80 66 80H34C31.7909 80 30 78.2091 30 76L26 38Z' fill='white' fill-opacity='0.15' stroke='white' stroke-width='6' stroke-linejoin='round'/><path d='M43 48C43 51.866 46.134 55 50 55C53.866 55 57 51.866 57 48' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>"
 
 const LoginPage = () => {
-  const {handleLogin}=useAuth()
-    // ── Single combined form state object ─────────────────────────────────────
-    // identifier = email OR phone number
-    const [formData, setFormData] = useState({
-        identifier: '',
-        password  : '',
-    })
-    // const {handleUserLogin}=useAuth()
+  const { handleLogin } = useAuth()
+  // ── Single combined form state object ─────────────────────────────────────
+  // identifier = email OR phone number
+  const [formData, setFormData] = useState({
+    identifier: '',
+    password: '',
+  })
+  // const {handleUserLogin}=useAuth()
 
   // ── UI-only states ─────────────────────────────────────────────────────────
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading]           = useState(false)
-  const [error, setError]               = useState('')
-  const [success, setSuccess]           = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   const navigate = useNavigate()
 
@@ -49,9 +49,9 @@ const LoginPage = () => {
         ? { email: formData.identifier, password: formData.password }
         : { contact: formData.identifier, password: formData.password }
 
-    const response=  await handleLogin(loginPayload)
+      const response = await handleLogin(loginPayload)
 
-     
+
       setSuccess('Login successful! Redirecting...')
       setTimeout(() => navigate('/'), 1200)
 
@@ -67,45 +67,53 @@ const LoginPage = () => {
     <div className="h-screen overflow-hidden flex">
 
       {/* ── LEFT PANEL ── Indigo gradient ───────────────────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-indigo-700 via-indigo-800 to-slate-900
-                      flex-col items-center justify-center px-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center relative overflow-hidden">
 
-        {/* Decorative circles */}
-        <div className="absolute -top-20 -left-20 w-72 h-72 bg-white opacity-5 rounded-full" />
-        <div className="absolute -bottom-16 -right-16 w-56 h-56 bg-indigo-400 opacity-10 rounded-full" />
+        {/* Fashion model background image */}
+        <img
+          src="/fashion-model-buyer-login.png"
+          alt="Fashion model"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
 
-        <div className="relative z-10 text-center">
+        {/* Dark indigo gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/80 via-indigo-800/70 to-slate-900/85" />
+
+        {/* Bottom fade for polish */}
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-slate-900/60 to-transparent" />
+
+        <div className="relative z-10 text-center px-12">
           {/* Logo */}
           <div className="mb-5 flex justify-center">
-            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg p-1">
+            <div className="w-20 h-20 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center shadow-2xl p-1">
               <img src="/styleverse-logo.png" onError={(e) => { e.currentTarget.src = DEFAULT_LOGO; }} alt="StyleVerse logo" className="w-full h-full object-contain" />
             </div>
           </div>
 
           {/* Brand */}
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
             StyleVerse
           </h1>
-          <p className="text-indigo-200 text-lg font-medium mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
+          <p className="text-indigo-200 text-lg font-medium mb-4 drop-shadow" style={{ fontFamily: 'Playfair Display, serif' }}>
             Welcome Back
           </p>
 
-          <div className="w-12 h-px bg-indigo-400 mx-auto mb-4" />
+          <div className="w-12 h-px bg-indigo-400/80 mx-auto mb-4" />
 
-          <p className="text-indigo-200 text-sm leading-relaxed max-w-xs mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-indigo-100 text-sm leading-relaxed max-w-xs mx-auto drop-shadow" style={{ fontFamily: 'Inter, sans-serif' }}>
             Sign back in to access your curated wardrobe, saved styles, and exclusive offers.
           </p>
 
           {/* Feature bullets */}
           <div className="mt-8 space-y-3 text-left">
             {[
-              { icon: '✦', text: 'Your wishlist awaits'   },
-              { icon: '✦', text: 'Track your orders'      },
+              { icon: '✦', text: 'Your wishlist awaits' },
+              { icon: '✦', text: 'Track your orders' },
               { icon: '✦', text: 'Exclusive member deals' },
             ].map((item) => (
               <div key={item.text} className="flex items-center gap-3">
                 <span className="text-indigo-300 text-xs">{item.icon}</span>
-                <span className="text-indigo-100 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>{item.text}</span>
+                <span className="text-indigo-100 text-sm drop-shadow" style={{ fontFamily: 'Inter, sans-serif' }}>{item.text}</span>
               </div>
             ))}
           </div>
@@ -232,7 +240,7 @@ const LoginPage = () => {
               <div className="flex-1 h-px bg-slate-100" />
             </div>
             <Link
-              to="/login"
+              to="/seller/login"
               state={{ role: 'seller' }}
               className="w-full h-10 flex items-center justify-center gap-2
                          border-2 border-slate-200 text-slate-600 font-semibold text-sm rounded-lg

@@ -1,6 +1,7 @@
 import {Router} from "express"
 import {validateRegisterUserLocal,loginValidatorLocal} from "../validators/auth.validator.js"
-import { registerLocal,verifyEmailController,loginControllerLocal,getMeController,refreshPageController,logoutController,googleCallback} from "../controllers/auth.controller.js"
+import { registerLocal,loginControllerLocal,googleCallback} from "../controllers/auth.controller.js"
+import {getMeController,refreshPageController,logoutController,verifyEmailController} from "../controllers/commonAuth.controller.js"
 import {authAccessUser} from "../middlewares/auth.middleware.js"
 import passport from "passport"
 import { config } from "../config/config.js"

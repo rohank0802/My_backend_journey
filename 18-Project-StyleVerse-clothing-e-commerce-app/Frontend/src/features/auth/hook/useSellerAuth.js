@@ -1,15 +1,14 @@
 import { useDispatch } from "react-redux";
 import { setUser,setError,setLoading } from "../auth.slice.js";
 
-import { RefreshPageUser,GetMeUser,registerUser,LoginUser,LogoutUser } from "../service/auth.api.js";
-
-export const useAuth=()=>{
+import {SellerGetMeUser,SellerLoginUser,SellerLogoutUser,SellerRefreshPageUser,SellerRegisterUser} from "../service/sellerAuth.api.js"
+export const useSellerAuth=()=>{
     const dispatch=useDispatch()
   
-async function handleRegister(user){
+async function handleSellerRegister(user){
     try{
         dispatch(setLoading(true))
-        const data=await registerUser(user)
+        const data=await SellerRegisterUser(user)
         dispatch(setUser(data.message))
         console.log(data.message)
     }catch(error){
@@ -21,10 +20,10 @@ async function handleRegister(user){
     }
 }
 
-async function handleLogin(user){
+async function handleSellerLogin(user){
     try{
         dispatch(setLoading(true))
-        const data=await LoginUser(user)
+        const data=await SellerLoginUser(user)
         dispatch(setUser(data.user))
         console.log(data.user)
     }catch(error){
@@ -35,10 +34,10 @@ async function handleLogin(user){
     }
 }
 
-async function handleLogout(){
+async function handleSellerLogout(){
     try{
         dispatch(setLoading(true))
-        const data=await LogoutUser()
+        const data=await SellerLogoutUser()
         dispatch(setUser(null))
     }catch(error){
         dispatch(setError(error))
@@ -48,22 +47,22 @@ async function handleLogout(){
     }
 }
 
-async function handlegetMeUser(){
+async function handleSellergetMeUser(){
     try{
         dispatch(setLoading(true))
-        const data=await GetMeUser()
+        const data=await SellerGetMeUser()
         dispatch(setUser(data.user))
         console.log(data.user)
     }catch(error){
-        if(error.response?.status==401){
+        if(error.response.status==401){
           try{
-            await RefreshPageUser()
-            const data=await GetMeUser()
+            await SellerRefreshPageUser()
+            const data=await SellerGetMeUser()
             dispatch(setUser(data.user))
             console.log(data.user)
           }catch(refreshError){
             dispatch(setUser(null))
-            return; 
+            return;
           }
         }
         else{
@@ -75,10 +74,10 @@ async function handlegetMeUser(){
     }
 }
 return{
-    handleLogin,
-    handleLogout,
-    handleRegister,
-    handlegetMeUser
+    handleSellerLogin,
+    handleSellerLogout,
+    handleSellerRegister,
+    handleSellergetMeUser
 }
 
 }
