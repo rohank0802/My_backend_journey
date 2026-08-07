@@ -12,9 +12,16 @@ async function handleRegister(user){
         const data=await registerUser(user)
         dispatch(setUser(data.message))
         console.log(data.message)
+        return true
     }catch(error){
-        
-        dispatch(setError(error.response?.data?.message||error.message))
+         const data=error.response?.data
+            if(data?.errors){
+                //express  validator error
+                dispatch(setError(data.errors))
+            }else{
+                dispatch(setError(data?.message||error.message))
+            }
+            return false
     }
     finally{
         dispatch(setLoading(false))
@@ -27,8 +34,16 @@ async function handleLogin(user){
         const data=await LoginUser(user)
         dispatch(setUser(data.user))
         console.log(data.user)
+        return true
     }catch(error){
-        dispatch(setError(error.response?.data?.message||error))
+        const data=error.response?.data
+        if(data?.errors){
+            //express validator error
+            dispatch(setError(data.errors))
+        }else{
+            dispatch(setError(data?.message||error.message))
+        }
+        return false
     }
     finally{
         dispatch(setLoading(false))

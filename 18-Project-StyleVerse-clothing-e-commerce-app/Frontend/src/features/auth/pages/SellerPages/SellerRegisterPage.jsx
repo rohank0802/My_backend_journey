@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { setError } from '../../auth.slice.js'
 import { useSellerAuth } from '../../hook/useSellerAuth.js'
 
 const DEFAULT_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><rect width='100' height='100' rx='24' fill='%234F46E5'/><path d='M32 38C32 38 40 24 50 24C60 24 68 38 68 38' stroke='white' stroke-width='6' stroke-linecap='round'/><path d='M26 38H74L70 76C70 78.2091 68.2091 80 66 80H34C31.7909 80 30 78.2091 30 76L26 38Z' fill='white' fill-opacity='0.15' stroke='white' stroke-width='6' stroke-linejoin='round'/><path d='M43 48C43 51.866 46.134 55 50 55C53.866 55 57 51.866 57 48' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>"
 
 const SellerRegisterPage = () => {
   const { handleSellerRegister } = useSellerAuth()
+  const dispatch = useDispatch()
 
   // ── Redux state for loading & error ──────────────────────────────────────
   const loading = useSelector((state) => state.auth.loading)
@@ -22,9 +24,26 @@ const SellerRegisterPage = () => {
 
   // ── UI-only states ─────────────────────────────────────────────────────────
   const [showPassword, setShowPassword] = useState(false)
+  const [formError, setFormError] = useState('')   // client-side validation error
   const [success, setSuccess] = useState('')
 
   const navigate = useNavigate()
+
+  // ── Ref to track whether we are awaiting an API response ──────────────────
+  // const pendingSuccess = useRef(false)
+
+  // // ── After the API call finishes, decide whether to show success ───────────
+  // useEffect(() => {
+  //   if (pendingSuccess.current && !loading) {
+  //     pendingSuccess.current = false
+  //     if (!reduxError) {
+  //       // ✅ API succeeded → show success
+  //       setSuccess('Seller account created! Redirecting...')
+  //       // setTimeout(() => navigate('/seller/login'), 1500)
+  //     }
+  //     // ❌ API failed → reduxError is already in state and shown in JSX
+  //   }
+  // }, [loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Generic change handler — one handler for all inputs ───────────────────
   const handleChange = (e) => {
@@ -36,12 +55,51 @@ const SellerRegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.fullName || !formData.email || !formData.contact || !formData.password) return
+    // ── Client-side validation (shown before calling the API) ────────────────
+    if (!formData.fullName.trim()) {
+      setFormError('Full name is required.')
+      return
+    }
+    if (formData.fullName.trim().length < 2) {
+      setFormError('Full name must be at least 2 characters.')
+      return
+    }
+    if (!formData.email.trim()) {
+      setFormError('Email address is required.')
+      return
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email.trim())) {
+      setFormError('Please enter a valid email address.')
+      return
+    }
+    if (!formData.contact.trim()) {
+      setFormError('Contact / phone number is required.')
+      return
+    }
+    if (formData.contact.trim().length < 7) {
+      setFormError('Contact number must be at least 7 digits.')
+      return
+    }
+    if (!formData.password.trim()) {
+      setFormError('Password is required.')
+      return
+    }
+    if (formData.password.length < 6) {
+      setFormError('Password must be at least 6 characters.')
+      return
+    }
 
-    await handleSellerRegister(formData)
+    setFormError('')          // clear any previous validation error
+    dispatch(setError(null))  // clear any stale Redux error from a previous attempt
 
-    setSuccess('Seller account created! Redirecting...')
-    // setTimeout(() => navigate('/seller/login'), 1500)
+    // pendingSuccess.current = true   // arm the useEffect guard
+    const result = await handleSellerRegister(formData)
+    if (result) {
+      setSuccess('Seller account created! Redirecting...')
+      setTimeout(() => navigate('/seller/verify-email'), 1500)
+    }
+    // Success message is handled in the useEffect above
   }
 
   return (
@@ -126,10 +184,21 @@ const SellerRegisterPage = () => {
             </p>
           </div>
 
-          {/* Error — from Redux state */}
+          {/* Client-side validation error */}
+          {formError && (
+            <div className="mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs" style={{ fontFamily: 'Inter, sans-serif' }}>
+              {formError}
+            </div>
+          )}
+          {/* API / Redux error */}
           {reduxError && (
             <div className="mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs" style={{ fontFamily: 'Inter, sans-serif' }}>
-              {reduxError}
+               {Array.isArray(reduxError)?(
+                reduxError.map((err,index)=>(<p key={index}>{err.msg}</p>))
+              ):
+              (
+                <p>{reduxError}</p>
+              )}
             </div>
           )}
           {/* Success — local UI state */}

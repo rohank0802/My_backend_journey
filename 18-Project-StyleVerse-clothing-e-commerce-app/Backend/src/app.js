@@ -2,7 +2,7 @@ import express from "express"
 import morgan from "morgan"
 import cookieParser from "cookie-parser"
 import authRouter from "./routes/auth.routes.js"
-import createProductRouter from "./routes/createProduct.routes.js"
+import productRouter from "./routes/product.routes.js"
 import sellerAuthRoute from "./routes/sellerAuth.routes.js"
 // import cors from "cors"
 
@@ -35,7 +35,7 @@ app.use("/api/auth",authRouter)
 
 //seller auth route
 app.use("/api/auth/seller",sellerAuthRoute)
-app.use("/api/createProducts",createProductRouter)
+app.use("/api/product",productRouter)
 
 
 export default app

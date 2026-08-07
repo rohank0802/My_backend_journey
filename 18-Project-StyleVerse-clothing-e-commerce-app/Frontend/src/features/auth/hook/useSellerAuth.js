@@ -11,9 +11,17 @@ async function handleSellerRegister(user){
         const data=await SellerRegisterUser(user)
         dispatch(setUser(data.message))
         console.log(data.message)
+        return true
     }catch(error){
         
-        dispatch(setError(error.response?.data?.message||error.message))
+    const data=error.response?.data
+    if(data?.errors){
+        //express  validator error
+        dispatch(setError(data.errors))
+    }else{
+        dispatch(setError(data?.message||error.message))
+    }
+    return false
     }
     finally{
         dispatch(setLoading(false))
@@ -26,8 +34,16 @@ async function handleSellerLogin(user){
         const data=await SellerLoginUser(user)
         dispatch(setUser(data.user))
         console.log(data.user)
+        return true
     }catch(error){
-        dispatch(setError(error.response?.data?.message||error))
+        const data=error.response?.data
+        if(data?.errors){
+            //express  validator error
+            dispatch(setError(data.errors))
+        }else{
+            dispatch(setError(data?.message||error.message))
+        }
+        return false
     }
     finally{
         dispatch(setLoading(false))
