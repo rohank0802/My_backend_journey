@@ -48,13 +48,15 @@ userSchema.methods.comparePassword=async function(userPassword){
 userSchema.methods.generateAccessToken=function(){
     return jwt.sign({
         id:this._id,
-        email:this.email
+        email:this.email,
+        role:this.role
     },config.ACCESS_JWT,{expiresIn:"15m"})
 }
 //generating RefreshToken
 userSchema.methods.generateRefreshToken=function(){
     return jwt.sign({
-       id:this._id
+       id:this._id,
+       role:this.role
     },config.REFRESH_JWT,{expiresIn:"7d"})
 }
 

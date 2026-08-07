@@ -2,8 +2,10 @@ import express from "express"
 import morgan from "morgan"
 import cookieParser from "cookie-parser"
 import authRouter from "./routes/auth.routes.js"
+import createProductRouter from "./routes/createProduct.routes.js"
 import sellerAuthRoute from "./routes/sellerAuth.routes.js"
 // import cors from "cors"
+
 import passport from "passport"
 import { Strategy as GoogleStrategy  } from  "passport-google-oauth20"
 import { mainConfig } from "./config/config.js"
@@ -33,5 +35,7 @@ app.use("/api/auth",authRouter)
 
 //seller auth route
 app.use("/api/auth/seller",sellerAuthRoute)
+app.use("/api/createProducts",createProductRouter)
+
 
 export default app

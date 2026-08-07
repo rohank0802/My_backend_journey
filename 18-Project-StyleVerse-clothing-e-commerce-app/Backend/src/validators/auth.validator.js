@@ -54,3 +54,49 @@ export const loginValidatorLocal=[
     }),
     validateRequest
 ]
+
+//createProduct validator
+
+export const createProductVaidator=[
+    body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("Title is required")
+    .isLength({min:3,max:100})
+    .withMessage("Title must be between 3 to 100 charactesrs"),
+
+    body("description")
+    .trim()
+    .notEmpty()
+    .withMessage("Description is required")
+    .isLength({min:10})
+    .withMessage("Description must be atleast 10 characters"),
+
+    body("price")
+    .notEmpty()
+    .withMessage("price is required")
+    .isFloat({min:0})
+    .withMessage("Price must be greater than or equal to 0"),
+
+    // body("price.c")
+    // .optional()
+    // .isIn(["INR","USD","EUR","GBP","JPY"])
+    // .withMessage("Invalid currency"),
+
+    // body("images")
+    // .isArray({null:1})
+    // .withMessage("At least one image is required"),
+
+    // body("images.*.url")
+    // .notEmpty()
+    // .withMessage("image url is required")
+    // .isURL()
+    // .withMessage("Invalid image URL"),
+
+    // body("Image.*.alt")
+    // .trim()
+    // .notEmpty()
+    // .withMessage("Image alt text is required"),
+    // validateRequest
+
+]
