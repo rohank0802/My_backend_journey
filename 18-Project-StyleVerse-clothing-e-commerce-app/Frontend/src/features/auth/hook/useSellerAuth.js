@@ -70,7 +70,7 @@ async function handleSellergetMeUser(){
         dispatch(setUser(data.user))
         console.log(data.user)
     }catch(error){
-        if(error.response.status==401){
+        if(error.response?.status==401){
           try{
             await SellerRefreshPageUser()
             const data=await SellerGetMeUser()
