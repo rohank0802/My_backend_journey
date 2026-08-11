@@ -28,7 +28,8 @@ export const sellerRoutes=[
             {
                 path:"/seller/create-product",
                 element:<CreateProduct/>
-            }
+            },
+           
         ]
     }
 ]

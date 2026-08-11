@@ -3,64 +3,196 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { useSellerProduct } from '../../hook/useSellerProduct.js'
 
+// ── How many images a seller can upload at most ─────────────────────────────
 const MAX_IMAGES = 7
 
 const CreateProduct = () => {
-  const { handleCreateProduct } = useSellerProduct()
-  const loading   = useSelector((state) => state.product.loading)
-  const reduxError = useSelector((state) => state.product.error)
-  const user       = useSelector((state) => state.auth.user)
-  const navigate   = useNavigate()
 
-  const [formData, setFormData] = useState({ title: '', description: '', price: '' })
+  // ── useSellerProduct hook ────────────────────────────────────────────────
+  // This custom hook gives us the "handleCreateProduct" function.
+  // When called, it sends the product data to the server via the API.
+  const { handleCreateProduct } = useSellerProduct()
+
+  // ── Reading data from Redux store ────────────────────────────────────────
+  // useSelector reads a piece of data from our global Redux store.
+  // "state.product.loading" is true while the API call is in progress.
+  const loading = useSelector((state) => state.product.loading)
+
+  // "state.product.error" holds any error message returned by the API.
+  const reduxError = useSelector((state) => state.product.error)
+
+  // "state.auth.user" holds the currently logged-in seller's info.
+  const user = useSelector((state) => state.auth.user)
+
+  // ── useNavigate ──────────────────────────────────────────────────────────
+  // This hook lets us move the user to a different page programmatically.
+  // We use it to redirect to the dashboard after the product is created.
+  const navigate = useNavigate()
+
+  // ── Form state ───────────────────────────────────────────────────────────
+  // We store all text-based form fields in one object called "formData".
+  // useState gives us the current value and a function to update it.
+  const [formData, setFormData] = useState({
+    title: '',       // product name
+    description: '', // product description
+    price: '',       // product price
+  })
+
+  // ── Image state ──────────────────────────────────────────────────────────
+  // "images"   → array of actual File objects (what we send to the server)
+  // "previews" → array of temporary URLs just for showing the thumbnail on screen
   const [images,   setImages]   = useState([])
   const [previews, setPreviews] = useState([])
-  const [formError, setFormError] = useState('')
-  const [success,  setSuccess]  = useState('')
 
+  // ── UI message states ────────────────────────────────────────────────────
+  // "formError" shows a red error message for client-side validation mistakes.
+  // "success"   shows a green message when the product is created successfully.
+  const [formError, setFormError] = useState('')
+  const [success,   setSuccess]   = useState('')
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // HANDLER 1: handleChange
+  // Called every time the user types into any text input or textarea.
+  // It reads the input's "name" attribute and updates only that field
+  // in "formData" while keeping all other fields the same.
+  // ─────────────────────────────────────────────────────────────────────────
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    const fieldName  = e.target.name  // e.g. "title", "description", "price"
+    const fieldValue = e.target.value // whatever the user typed
+
+    // "...prev" keeps all existing fields; [fieldName]: fieldValue updates just one
+    setFormData((prev) => ({ ...prev, [fieldName]: fieldValue }))
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // HANDLER 2: handleImageChange
+  // Called when the user picks image files using the file input.
+  // It checks how many slots are left, creates preview URLs, and stores
+  // the real File objects so we can send them to the server later.
+  // ─────────────────────────────────────────────────────────────────────────
   const handleImageChange = (e) => {
-    const files     = Array.from(e.target.files)
+    // Convert the FileList (browser object) into a normal JavaScript array
+    const selectedFiles = Array.from(e.target.files)
+
+    // How many more images can still be added?
     const slotsLeft = MAX_IMAGES - images.length
-    if (slotsLeft <= 0) { setFormError(`Maximum ${MAX_IMAGES} images allowed.`); return }
-    const allowed     = files.slice(0, slotsLeft)
-    const newPreviews = allowed.map((f) => URL.createObjectURL(f))
-    setImages((p)   => [...p, ...allowed])
-    setPreviews((p) => [...p, ...newPreviews])
+
+    // If no slots remain, show an error and stop
+    if (slotsLeft <= 0) {
+      setFormError(`You can upload a maximum of ${MAX_IMAGES} images.`)
+      return
+    }
+
+    // Only take as many files as there are slots left
+    const allowedFiles = selectedFiles.slice(0, slotsLeft)
+
+    // createObjectURL() creates a temporary local URL for each file
+    // so the browser can display a thumbnail without uploading anything yet
+    const newPreviewUrls = allowedFiles.map((file) => URL.createObjectURL(file))
+
+    // Add the new files to our existing images array
+    setImages((previousImages) => [...previousImages, ...allowedFiles])
+
+    // Add the new preview URLs to our existing previews array
+    setPreviews((previousPreviews) => [...previousPreviews, ...newPreviewUrls])
+
+    // Clear any previous error message
     setFormError('')
+
+    // Reset the file input so the user can pick the same file again if needed
     e.target.value = ''
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // HANDLER 3: handleRemoveImage
+  // Called when the user clicks the "×" button on a thumbnail.
+  // It removes that specific image from both arrays by its index (position).
+  // ─────────────────────────────────────────────────────────────────────────
   const handleRemoveImage = (index) => {
+    // Free the temporary preview URL from browser memory to avoid memory leaks
     URL.revokeObjectURL(previews[index])
-    setImages((p)   => p.filter((_, i) => i !== index))
-    setPreviews((p) => p.filter((_, i) => i !== index))
+
+    // Keep every image EXCEPT the one at the given index
+    setImages((previousImages) => previousImages.filter((_, i) => i !== index))
+
+    // Same for previews — remove only the one at the given index
+    setPreviews((previousPreviews) => previousPreviews.filter((_, i) => i !== index))
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // HANDLER 4: handleSubmit
+  // Called when the user clicks "Create Product".
+  // Step 1: Validate the form (check all fields are filled correctly).
+  // Step 2: Build a FormData object (needed to send files + text together).
+  // Step 3: Call the API via our hook and handle success or failure.
+  // ─────────────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
+    // Prevent the default browser behaviour (page reload on form submit)
     e.preventDefault()
-    if (!formData.title.trim())        return setFormError('Product title is required.')
-    if (formData.title.trim().length < 3) return setFormError('Title must be at least 3 characters.')
-    if (!formData.description.trim())  return setFormError('Description is required.')
-    if (!formData.price || isNaN(Number(formData.price)) || Number(formData.price) <= 0)
-      return setFormError('Enter a valid price greater than 0.')
-    if (images.length === 0)           return setFormError('Add at least one product image.')
+
+    // ── Step 1: Client-side Validation ──────────────────────────────────────
+    // Check title — must not be empty
+    if (!formData.title.trim()) {
+      setFormError('Product title is required.')
+      return // stop here — do NOT call the API
+    }
+
+    // Title must be at least 3 characters long
+    if (formData.title.trim().length < 3) {
+      setFormError('Title must be at least 3 characters.')
+      return
+    }
+
+    // Check description — must not be empty
+    if (!formData.description.trim()) {
+      setFormError('Description is required.')
+      return
+    }
+
+    // Check price — must exist, be a valid number, and greater than 0
+    const priceAsNumber = Number(formData.price)
+    if (!formData.price || isNaN(priceAsNumber) || priceAsNumber <= 0) {
+      setFormError('Enter a valid price greater than 0.')
+      return
+    }
+
+    // At least one image must be selected
+    if (images.length === 0) {
+      setFormError('Add at least one product image.')
+      return
+    }
+
+    // All checks passed — clear any old error message
     setFormError('')
-    const data = new FormData()
-    data.append('title',       formData.title.trim())
-    data.append('description', formData.description.trim())
-    data.append('price',       formData.price)
-    images.forEach((img) => data.append('images', img))
-    const result = await handleCreateProduct(data)
-    if (result) {
-      setSuccess('Product listed! Redirecting...')
+
+    // ── Step 2: Build FormData ───────────────────────────────────────────────
+    // FormData is a special browser object that can carry BOTH text AND files.
+    // The server needs this format to receive file uploads alongside text fields.
+    const productData = new FormData()
+    productData.append('title',       formData.title.trim())
+    productData.append('description', formData.description.trim())
+    productData.append('price',       formData.price)
+
+    // Add every selected image file one by one
+    // The server expects these under the field name "images"
+    images.forEach((imageFile) => {
+      productData.append('images', imageFile)
+    })
+
+    // ── Step 3: Call the API ─────────────────────────────────────────────────
+    // handleCreateProduct comes from our custom hook (useSellerProduct).
+    // It dispatches loading/error to Redux and calls the backend.
+    // It returns true if the product was created, false if something went wrong.
+    const wasSuccessful = await handleCreateProduct(productData)
+
+    if (wasSuccessful) {
+      // Show a green success banner, then navigate to dashboard after 1.5 seconds
+      setSuccess('Product listed successfully! Redirecting...')
       setTimeout(() => navigate('/seller/dashboard'), 1500)
     }
+    // If it failed, the hook already put the error in "reduxError" (shown above the form)
   }
+
 
   /* ─────────────────────────── RENDER ─────────────────────────────────── */
   return (
@@ -98,7 +230,7 @@ const CreateProduct = () => {
         <button
           type="button"
           onClick={() => navigate('/seller/dashboard')}
-          className="flex items-center gap-1 text-xs text-slate-400 hover:text-indigo-600 transition-colors"
+          className="flex items-center gap-1 text-xs text-slate-600 hover:text-indigo-600 transition-colors"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -117,8 +249,8 @@ const CreateProduct = () => {
 
           {/* Greeting — hidden on very small screens to save space */}
           {user?.fullName && (
-            <p className="hidden sm:block text-xs text-slate-400 mb-4 text-center lg:text-left">
-              Hello, <span className="text-slate-600 font-medium">{user.fullName}</span> — fill in the details below.
+            <p className="hidden sm:block text-xs text-slate-600 mb-4 text-center lg:text-left">
+              Hello, <span className="text-slate-800 font-medium">{user.fullName}</span> — fill in the details below.
             </p>
           )}
 
@@ -158,7 +290,7 @@ const CreateProduct = () => {
                 <div>
                   <label
                     htmlFor="cp-title"
-                    className="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5"
+                    className="block text-[10px] font-bold uppercase tracking-widest text-slate-700 mb-1.5"
                   >
                     Product Title
                   </label>
@@ -169,8 +301,8 @@ const CreateProduct = () => {
                     placeholder="e.g. Classic White Linen Shirt"
                     value={formData.title}
                     onChange={handleChange}
-                    className="w-full h-10 px-3.5 border border-slate-200 rounded-lg text-sm text-slate-800
-                               placeholder-slate-300 focus:outline-none focus:border-indigo-700
+                    className="w-full h-10 px-3.5 border border-slate-300 rounded-lg text-sm text-slate-900
+                               placeholder-slate-400 focus:outline-none focus:border-indigo-700
                                focus:ring-2 focus:ring-indigo-100 transition-all duration-200"
                   />
                 </div>
@@ -179,7 +311,7 @@ const CreateProduct = () => {
                 <div className="flex flex-col flex-1">
                   <label
                     htmlFor="cp-description"
-                    className="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5"
+                    className="block text-[10px] font-bold uppercase tracking-widest text-slate-700 mb-1.5"
                   >
                     Description
                   </label>
@@ -190,8 +322,8 @@ const CreateProduct = () => {
                     placeholder="Describe your product — material, fit, occasion, size guide..."
                     value={formData.description}
                     onChange={handleChange}
-                    className="w-full flex-1 px-3.5 py-3 border border-slate-200 rounded-lg text-sm text-slate-800
-                               placeholder-slate-300 resize-none focus:outline-none focus:border-indigo-700
+                    className="w-full flex-1 px-3.5 py-3 border border-slate-300 rounded-lg text-sm text-slate-900
+                               placeholder-slate-400 resize-none focus:outline-none focus:border-indigo-700
                                focus:ring-2 focus:ring-indigo-100 transition-all duration-200 leading-relaxed"
                   />
                 </div>
@@ -204,13 +336,13 @@ const CreateProduct = () => {
                 <div>
                   <label
                     htmlFor="cp-price"
-                    className="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5"
+                    className="block text-[10px] font-bold uppercase tracking-widest text-slate-700 mb-1.5"
                   >
                     Price
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium select-none">
-                      $
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 text-sm font-medium select-none">
+                      ₹
                     </span>
                     <input
                       id="cp-price"
@@ -221,8 +353,8 @@ const CreateProduct = () => {
                       placeholder="0.00"
                       value={formData.price}
                       onChange={handleChange}
-                      className="w-full h-10 pl-7 pr-3.5 border border-slate-200 rounded-lg text-sm text-slate-800
-                                 placeholder-slate-300 focus:outline-none focus:border-indigo-700
+                      className="w-full h-10 pl-7 pr-3.5 border border-slate-300 rounded-lg text-sm text-slate-900
+                                 placeholder-slate-400 focus:outline-none focus:border-indigo-700
                                  focus:ring-2 focus:ring-indigo-100 transition-all duration-200"
                     />
                   </div>
@@ -230,9 +362,9 @@ const CreateProduct = () => {
 
                 {/* Images */}
                 <div className="flex flex-col flex-1">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-700 mb-1.5">
                     Images{' '}
-                    <span className="normal-case tracking-normal font-normal text-slate-400">
+                    <span className="normal-case tracking-normal font-normal text-slate-600">
                       ({images.length} / {MAX_IMAGES})
                     </span>
                   </label>
@@ -246,11 +378,11 @@ const CreateProduct = () => {
                                  hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-200 group mb-3"
                     >
                       <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center mb-1">
-                        <svg className="w-4 h-4 text-slate-400 group-hover:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <svg className="w-4 h-4 text-slate-500 group-hover:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                       </div>
-                      <p className="text-[11px] text-slate-500 group-hover:text-indigo-600 transition-colors font-medium">
+                      <p className="text-[11px] text-slate-700 group-hover:text-indigo-600 transition-colors font-medium">
                         Click to upload — {MAX_IMAGES - images.length} slots left
                       </p>
                       <input id="cp-images" type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />

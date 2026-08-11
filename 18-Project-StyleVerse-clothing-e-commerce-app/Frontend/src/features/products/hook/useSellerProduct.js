@@ -1,47 +1,47 @@
-import {createProductApi,getSellerProductApi} from "../services/sellerProduct.api.js"
-import {useDispatch} from "react-redux"
-import {setSellerProducts,setLoading,setError} from "../state/product.slice.js"
+import { createProductApi, getSellerProductApi } from "../services/sellerProduct.api.js"
+import { useDispatch } from "react-redux"
+import { setSellerProducts, setLoading, setError } from "../state/product.slice.js"
 
-export const useSellerProduct=()=>{
-    const dispatch=useDispatch()
-    const handleCreateProduct=async(productData)=>{
-        try{
+export const useSellerProduct = () => {
+    const dispatch = useDispatch()
+    const handleCreateProduct = async (productData) => {
+        try {
             dispatch(setLoading(true))
-            const response=await createProductApi(productData)
-            dispatch(setProducts(response.product))
-            
+            const response = await createProductApi(productData)
+            dispatch(setSellerProducts(response.product))
+
             return true;
-        }catch(error){
-            const data=error.response?.data
-                    if(data?.errors){
-                        //express  validator error
-                        dispatch(setError(data.errors))
-                    }else{
-                        dispatch(setError(data?.message||error.message))
-                    }
+        } catch (error) {
+            const data = error.response?.data
+            if (data?.errors) {
+                //express  validator error
+                dispatch(setError(data.errors))
+            } else {
+                dispatch(setError(data?.message || error.message))
+            }
             return false;
         }
-        finally{
+        finally {
             dispatch(setLoading(false))
         }
     }
 
-    const handleGetSellerProducts=async()=>{
-        try{
+    const handleGetSellerProducts = async () => {
+        try {
             dispatch(setLoading(true))
-            const response=await getSellerProductApi()
-            dispatch(setProducts(response.products))
-            
+            const response = await getSellerProductApi()
+            dispatch(setSellerProducts(response.products))
+
             return true;
-        }catch(error){
+        } catch (error) {
             dispatch(setError(error))
             return false;
         }
-        finally{
+        finally {
             dispatch(setLoading(false))
         }
     }
-    
+
     return {
         handleCreateProduct,
         handleGetSellerProducts
