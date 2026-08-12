@@ -1,7 +1,6 @@
 import { createProductApi, getSellerProductApi } from "../services/sellerProduct.api.js"
 import { useDispatch } from "react-redux"
 import { setSellerProducts, setLoading, setError } from "../state/product.slice.js"
-
 export const useSellerProduct = () => {
     const dispatch = useDispatch()
     const handleCreateProduct = async (productData) => {
@@ -41,7 +40,6 @@ export const useSellerProduct = () => {
             dispatch(setLoading(false))
         }
     }
-
     return {
         handleCreateProduct,
         handleGetSellerProducts

@@ -1,7 +1,7 @@
 import {Router} from "express"
 import { authorizeRoles } from "../middlewares/authorize.middleware.js"    
 import { authAccessUser } from "../middlewares/auth.middleware.js"
-import { createProductController,getSellerProductsController } from "../controllers/Product.controller.js"
+import { createProductController,getSellerProductsController,getAllProducts,getProductDeatil } from "../controllers/Product.controller.js"
 
 import {createProductVaidator} from "../validators/auth.validator.js"
 import multer from "multer"
@@ -23,5 +23,12 @@ productRouter.post("/createProduct",authAccessUser,authorizeRoles("seller"),crea
 //view created products by perticular seller
 productRouter.get("/viewProducts",authAccessUser,authorizeRoles("seller"),getSellerProductsController)
 
+
+//user
+
+productRouter.get("/",getAllProducts)
+
+//get single product /api/product/detail/:id
+productRouter.get("/detail/:id",getProductDeatil)
 
 export default productRouter

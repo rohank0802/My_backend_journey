@@ -1,10 +1,44 @@
-import { Children } from "react";
 import { Link } from "react-router-dom";
 import LoginPage from "../../features/auth/pages/buyerPages/LoginPage.jsx";
 import RegisterPage from "../../features/auth/pages/buyerPages/RegisterPage.jsx";
 import BuyerProtectedRoutes from "../../features/auth/protectedComponents/BuyerProtectedRoute.jsx";
+import BuyerLayout from "../../features/products/pages/buyerPage/BuyerLayout.jsx";
+import BuyerDashboard from "../../features/Dashboard/BuyerDashboard.jsx";
+import ProductDetail from "../../features/products/pages/buyerPage/ProductDetail.jsx";
 
 export const buyerRoutes = [
+    {
+        element: <BuyerLayout />,
+        children: [
+            {
+                path: "/",
+                element: <BuyerDashboard />
+            },
+            {
+                path:"/products/:productId",
+                element:<ProductDetail/>
+            },
+            // Buyer Protected pages
+            {
+                element: <BuyerProtectedRoutes />,
+                children: [
+                    {
+                        path: "/buyer/verify-email",
+                        element: (
+                            <h1 className="p-8 text-center text-white">
+                                Registration successful. Please verify your email before login. Verification link sent to your registered email.{' '}
+                                <Link to="/login" className="text-indigo-400 cursor-pointer underline">
+                                    Go to login page
+                                </Link>
+                            </h1>
+                        )
+                    }
+                ]
+            }
+        ]
+    },
+
+    // Pages without navbar and footer
     {
         path: "/login",
         element: <LoginPage />
@@ -12,18 +46,5 @@ export const buyerRoutes = [
     {
         path: "/register",
         element: <RegisterPage />
-    },
-    {
-        element: <BuyerProtectedRoutes />,
-        children: [
-            {
-                path: "/",
-                element: <h1>hello world</h1>
-            },
-            {
-                path: "/buyer/verify-email",
-                element: <h1>regestrition seccessfull .please verify you email before login.varification link is sended on your registered email. <Link to="/login" className="text-indigo-600 cursor-pointer hover:underline">Go on login page</Link></h1>
-            }
-        ]
     }
 ]
