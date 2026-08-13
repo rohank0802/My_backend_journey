@@ -1,4 +1,60 @@
 import mongoose from "mongoose"
+
+const varientSchema=new mongoose.Schema({
+    sku:{
+        type:String,
+        required:true,
+        unique:true,
+        trim:true
+    },
+    color:{
+        type:String,
+        trim:true
+    },
+    size:{
+        type:String,
+        required:true,
+        trim:true
+    },
+    price:{
+        amount:{
+            type:Number,
+            
+            min:0,
+        },
+        currency:{
+            type:String,
+            enum:["INR","USD","EUR","GBP","JPY"],
+            default:"INR"
+        },
+    },
+    stock:{
+        type:Number,
+        required:true,
+        min:0
+    },
+    attributes:{
+        type:Map,
+        of:String
+    },
+    images:[
+        {
+            url:{
+                type:String,
+                
+            },
+            field:{
+                type:String,
+                
+            },
+            alt:{
+                type:String,
+                
+            },
+        },
+    ],
+},{_id:true})
+
 const productSchema=new mongoose.Schema({
     title:{
         type:String,
@@ -40,7 +96,9 @@ const productSchema=new mongoose.Schema({
                 required:true
             }
         }
-    ]
+    ],
+    variants:[varientSchema]
+
 },{timestamps:true})
 
 const productModel=mongoose.model('product',productSchema)

@@ -97,6 +97,53 @@ export const createProductVaidator=[
     // .trim()
     // .notEmpty()
     // .withMessage("Image alt text is required"),
-    // validateRequest
+     validateRequest
+
+]
+
+// variants validation 
+export const createVariantsvalidator=[
+    body("sku")
+    .trim()
+    .notEmpty()
+    .withMessage("SKU is required"),
+
+     body("color")
+     .optional()
+    .trim()
+    .isLength({min:2,max:50})
+    .withMessage("color must be between 2 and 50 characters"),
+
+     body("size")
+    .trim()
+    .notEmpty()
+    .isLength({min:1,max:20})
+    .withMessage("size must be between 1 and 20 characters"),
+    
+
+     body("stock")
+     .notEmpty()
+     .withMessage('stock is required')
+     .isInt({min:0})
+    .withMessage("stock must be a non-negative integer"),
+
+     body("price.amount")
+     .optional()
+    .isFloat({min:0})
+    .withMessage("price must be greater than or equal to 0"),
+
+     body("attributes")
+    .optional()
+    .isObject()
+    .withMessage("Attributes must be an object")
+    .custom((attributes)=>{
+        for(const [key,values] of Object.entries(attributes)){
+            if(typeof value !== "string"){
+                throw new Error(`Attributes "${key}" must be string`)
+            }
+        }
+        return true
+    }),
+    validateRequest
 
 ]

@@ -35,6 +35,8 @@ app.use("/api/auth",authRouter)
 
 //seller auth route
 app.use("/api/auth/seller",sellerAuthRoute)
+
+
 app.use("/api/product",productRouter)
 
 
