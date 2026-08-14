@@ -138,7 +138,7 @@ export const createVariantsvalidator=[
     .withMessage("Attributes must be an object")
     .custom((attributes)=>{
         for(const [key,values] of Object.entries(attributes)){
-            if(typeof value !== "string"){
+            if(typeof values !== "string"){
                 throw new Error(`Attributes "${key}" must be string`)
             }
         }

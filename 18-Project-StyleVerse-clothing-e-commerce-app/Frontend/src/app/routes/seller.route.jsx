@@ -4,7 +4,7 @@ import SellerProtectedRoutes from "../../features/auth/protectedComponents/Selle
 import { Link } from "react-router-dom";
 import CreateProduct from "../../features/products/pages/sellerPage/CreateProduct.jsx";
 import SellerDashboard from "../../features/Dashboard/SellerDashboard.jsx";
-
+import SellerProductDetail from "../../features/products/pages/sellerPage/SellerProductDetail.jsx";
 export const sellerRoutes=[
     {
         path:"/seller/login",
@@ -29,6 +29,10 @@ export const sellerRoutes=[
                 path:"/seller/create-product",
                 element:<CreateProduct/>
             },
+            {
+                path:"/seller/product/:productId",
+             element:<SellerProductDetail/>
+            }
            
         ]
     }

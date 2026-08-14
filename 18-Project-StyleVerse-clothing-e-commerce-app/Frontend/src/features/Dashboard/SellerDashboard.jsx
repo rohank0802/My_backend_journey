@@ -350,6 +350,7 @@ console.log(products)
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {products.map((product) => (
                 <div
+                onClick={()=>{navigate(`/seller/product/${product._id}`)}}
                   key={product._id}
                   className="bg-slate-800 rounded-2xl overflow-hidden border border-slate-700
                              shadow-[0_2px_20px_rgba(0,0,0,0.25)]

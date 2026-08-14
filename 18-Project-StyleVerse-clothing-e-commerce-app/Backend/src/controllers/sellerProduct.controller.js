@@ -1,7 +1,7 @@
 import { isObjectIdOrHexString } from "mongoose";
 import productModel from "../models/product.model.js";
 import {uploadFile} from "../services/storage.service.js"
-
+import mongoose from "mongoose";
 
 
 export async function createProductController(req,res){
@@ -143,9 +143,10 @@ if(product.seller.toString() !== req.user.id.toString()){
 
 //get variant data from req body
 const {sku,color,size,stock,price,attributes}=req.body
-
-//parse attributes if they came as a string
-const parsedAttributes=typeof attributes==="string"?JSON.parse(attributes):attributes
+// //parse prise is they came as a string
+// const parsedPrice=typeof price==="string"?JSON.parse(price):price
+// //parse attributes if they came as a string
+// const parsedAttributes=typeof attributes==="string"?JSON.parse(attributes):attributes
 
 //decide the price
 //if variant price is provided use variant price
@@ -181,7 +182,6 @@ const variant={
 sku,color,size,price:variantPrice,stock:Number(stock),attributes,images:variantImages
 
 }
-
 //add variant to product
 
 product.variants.push(variant)
@@ -192,7 +192,7 @@ const updatedProduct=await product.save()
 return res.status(201).json({
     success:true,
     message:"variant created successfully",
-    updatedProduct
+    variant
 })
 
 }

@@ -1,4 +1,4 @@
-import { createProductApi, getSellerProductApi } from "../services/sellerProduct.api.js"
+import { createProductApi, getSellerProductApi, getSellerProductDetail, createSellerVariantApi} from "../services/sellerProduct.api.js"
 import { useDispatch } from "react-redux"
 import { setSellerProducts, setLoading, setError } from "../state/product.slice.js"
 export const useSellerProduct = () => {
@@ -40,8 +40,49 @@ export const useSellerProduct = () => {
             dispatch(setLoading(false))
         }
     }
+  
+    const handleGetSellerProductDetail=async(productId)=>{
+        try {
+            dispatch(setLoading(true))
+            const response=await getSellerProductDetail(productId)
+            dispatch(setSellerProducts(response.product))
+
+            return true;
+        } catch (error) {
+            dispatch(setError(error))
+            return false;
+        }
+        finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    const handleCreateSellerVariant=async(productId,variantData)=>{
+        try {
+            
+            const response=await createSellerVariantApi(productId,variantData)
+          
+
+            return response.variant;
+        } catch (error) {
+            const data = error.response?.data
+            if (data?.errors) {
+                //express  validator error
+                dispatch(setError(data.errors))
+                return data.errors
+            } else {
+                dispatch(setError(data?.message || error.message))
+                return data?.message||error.message
+            }
+            
+        }
+        
+    }
+
     return {
         handleCreateProduct,
-        handleGetSellerProducts
+        handleGetSellerProducts,
+        handleGetSellerProductDetail,
+        handleCreateSellerVariant
     }
 }

@@ -5,7 +5,7 @@ import { createProductController,getSellerProductsController ,getSellerProductDe
 import {getAllProducts,getProductDeatil} from "../controllers/buyerProduct.controller.js"
 import {createProductVaidator,createVariantsvalidator} from "../validators/auth.validator.js"
 import multer from "multer"
-
+import {parseVariantData} from "../middlewares/sellerVariantParsing.middleware.js"
 
 const upload=multer({
     storage:multer.memoryStorage(),
@@ -27,7 +27,7 @@ productRouter.get("/viewProducts",authAccessUser,authorizeRoles("seller"),getSel
 productRouter.get("/seller/detail/:id",authAccessUser,authorizeRoles("seller"),getSellerProductDetailController)
 
 // @route post /api/seller/product/:productId/variants
-productRouter.post("/seller/detail/:productId/variants",authAccessUser,authorizeRoles("seller"),upload.array("images",7),createVariantsvalidator,addProductVariantController)
+productRouter.post("/seller/detail/:productId/variants",authAccessUser,authorizeRoles("seller"),upload.array("images",7),parseVariantData,createVariantsvalidator,addProductVariantController)
 
 //user
 
