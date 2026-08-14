@@ -117,6 +117,11 @@ try{
 // get productId from url
 const {productId}=req.params
 
+console.log("REQ PARAMS", req.params)
+console.log("PRODUCT ID " ,productId);
+console.log("PRODUCT LENGTH" ,productId?.length)
+console.log( "ISVALID" , mongoose.Types.ObjectId.isValid(productId))
+
 //check whether productId is valid mongoDB objectId
 if(!mongoose.Types.ObjectId.isValid(productId)){
     return res.status(400).json({
@@ -202,6 +207,12 @@ if(error.code===11000){
         success:false,
         message:"SKU already exists"
     })
+}
+if(error.message==="variant SKU must be unique within this product"){
+return res.status(409).json({
+    success:false,
+    message:error.message
+})
 }
 return res.status(500).json({
     status:false,

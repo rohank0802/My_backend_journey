@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useSellerProduct } from '../../hook/useSellerProduct.js'
 
 const MAX_IMAGES = 7
@@ -6,22 +6,36 @@ const MAX_IMAGES = 7
 const CreateVariant = ({ productId, isOpen, onClose, onSuccess }) => {
   const { handleCreateSellerVariant } = useSellerProduct()
 
-  // ── OWN LOCAL STATES (Not taking from Redux as requested) ─────────────────
-  const [formData, setFormData] = useState({
+  // ── INITIAL FORM STATE ──────────────────────────────────────────────────
+  const initialFormState = {
     sku: '',
-    color: 'black',
+    color: '',
     size: 'M',
-    priceAmount: '500',
-    stock: '20',
-    material: 'Cotton',
-    fit: 'Oversized',
-  })
+    priceAmount: '',
+    stock: '',
+    material: '',
+    fit: '',
+  }
 
+  // ── OWN LOCAL STATES (Not taking from Redux as requested) ─────────────────
+  const [formData, setFormData] = useState(initialFormState)
   const [images, setImages] = useState([])
   const [previews, setPreviews] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState('')
+
+  // ── Reset Form whenever Modal is opened ──────────────────────────────────
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(initialFormState)
+      setImages([])
+      setPreviews([])
+      setError(null)
+      setSuccess('')
+      setLoading(false)
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 

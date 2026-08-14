@@ -101,6 +101,15 @@ const productSchema=new mongoose.Schema({
 
 },{timestamps:true})
 
+productSchema.pre("validate",function(){
+    const skus=this.variants.map(variant=>variant.sku);
+if(new Set(skus).size !==skus.length){
+    
+      throw new Error("variant SKU must be unique within this product")
+    
+}
+})
+
 const productModel=mongoose.model('product',productSchema)
 
 export default productModel
