@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser"
 import authRouter from "./routes/auth.routes.js"
 import productRouter from "./routes/product.routes.js"
 import sellerAuthRoute from "./routes/sellerAuth.routes.js"
+import cartRoute from "./routes/cart.routes.js"
 // import cors from "cors"
 
 import passport from "passport"
@@ -39,5 +40,8 @@ app.use("/api/auth/seller",sellerAuthRoute)
 
 app.use("/api/product",productRouter)
 
+
+// cart route
+app.use("/api/cart",cartRoute)
 
 export default app
