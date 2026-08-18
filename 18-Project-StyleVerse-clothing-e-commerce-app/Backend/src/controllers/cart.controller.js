@@ -43,20 +43,20 @@ export const addToCartController=async(req,res)=>{
         
         //find user's cart
         let cart=await cartModel.findOne({
-            user:req.user._id
+            user:req.user.id
         })
         
         //if cart doesn't exist ,create it 
         if(!cart){
             cart =await cartModel.create({
-                user:req.user._id,
+                user:req.user.id,
                 items:[]
             })
         }
         
         
         //check wether same product +variant already exists
-        const existingItem=cart.items.find((item)=>item.product.toastring()===productId.toString()&&item.variant?.toString()===variantId.tostring())
+        const existingItem=cart.items.find((item)=>item.product.toString()===productId.toString()&&item.variant?.toString()===variantId.toString())
         
         //if already axist
         if(existingItem){
@@ -72,7 +72,7 @@ export const addToCartController=async(req,res)=>{
             // imcrease existing items's quantity
             await cartModel.findOneAndUpdate(
                 {
-                    user:req.user._id,
+                    user:req.user.id,
                     "items.product":productId,
                     "items.variant":variantId
                 },
@@ -123,4 +123,35 @@ export const addToCartController=async(req,res)=>{
         })
     }
 
+}
+
+export const getCartController=async(req,res)=>{
+try{
+    const user =req.user
+
+let cart=await cartModel.findOne({user:user.id}).populate("items.product")
+if(!cart){
+   cart=await cartModel.create({user:user.id,items:[]})
+}
+if(!cart.items){
+    cart.items=[]
+}
+//for get exact variant
+//  cart.items.forEach((item)=>{
+//     const selectedVariant=item.product.variants.find((variant)=>variant._id.toString()===item.variant.toString()
+// )
+// item.varinat=selectedVariant
+//  })
+
+ return res.status(200).json({
+    seccess:true,
+    cart
+ })
+}
+catch(error){
+return res.status(500).json({
+    success:false,
+    message:error.message
+})
+}
 }

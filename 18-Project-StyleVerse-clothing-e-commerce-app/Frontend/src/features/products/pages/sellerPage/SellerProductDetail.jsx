@@ -154,6 +154,7 @@ function SellerProductDetail() {
             {/* Create Variant Modal Popup */}
             <CreateVariant
                 productId={productId}
+                existingVariants={mainProduct?.variants || []}
                 isOpen={isVariantModalOpen}
                 onClose={() => setIsVariantModalOpen(false)}
                 onSuccess={fetchProductDetail}

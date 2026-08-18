@@ -5,7 +5,7 @@ import BuyerProtectedRoutes from "../../features/auth/protectedComponents/BuyerP
 import BuyerLayout from "../../features/products/pages/buyerPage/BuyerLayout.jsx";
 import BuyerDashboard from "../../features/Dashboard/BuyerDashboard.jsx";
 import ProductDetail from "../../features/products/pages/buyerPage/ProductDetail.jsx";
-
+import CartPage from "../../features/cart/pages/CartPage.jsx";
 export const buyerRoutes = [
     {
         element: <BuyerLayout />,
@@ -32,6 +32,10 @@ export const buyerRoutes = [
                                 </Link>
                             </h1>
                         )
+                    },
+                    {
+                        path:"/buyer/cart",
+                        element:<CartPage/>
                     }
                 ]
             }

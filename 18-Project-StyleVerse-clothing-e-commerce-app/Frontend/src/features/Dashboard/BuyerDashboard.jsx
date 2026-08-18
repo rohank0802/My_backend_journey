@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useBuyerProduct } from '../products/hook/useBuyerProduct.js'
+import BuyerDashboardNavbar from './BuyerDashboardNavbar.jsx'
 
 const BuyerDashboard = () => {
   const navigate = useNavigate()
@@ -23,9 +24,76 @@ const BuyerDashboard = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-6 lg:px-8" style={{ fontFamily: 'Inter, sans-serif' }}>
-      <div className="max-w-7xl mx-auto">
-        
+    <div className="min-h-screen bg-slate-50 text-slate-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <BuyerDashboardNavbar />
+
+      {/* ── HERO DISPLAY BANNER (65% Viewport Height, Full Width) ─────────── */}
+      <div className="relative w-full h-[65vh] min-h-[460px] flex items-center justify-center overflow-hidden bg-slate-950">
+
+        {/* Background Image */}
+        <img
+          src="/fashion-model.png"
+          alt="StyleVerse Fashion Display"
+          className="absolute inset-0 w-full h-full object-cover object-center filter brightness-90 scale-105"
+        />
+
+        {/* Sophisticated Dark Indigo Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-indigo-950/75 to-slate-950/90 backdrop-blur-[1px]" />
+
+        {/* Hero Overlay Content */}
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center justify-center space-y-6">
+
+          {/* Eyebrow Chip */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md shadow-lg">
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+            <span className="text-xs font-semibold uppercase tracking-widest text-indigo-200">
+              StyleVerse Marketplace
+            </span>
+          </div>
+
+          {/* Main Title */}
+          <h1
+            className="text-3xl sm:text-5xl lg:text-6xl font-normal text-white tracking-tight leading-tight max-w-4xl drop-shadow-md"
+            style={{ fontFamily: 'Playfair Display, serif' }}
+          >
+            Elevate Your Wardrobe with StyleVerse
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            className="text-sm sm:text-base lg:text-lg text-slate-300 max-w-2xl font-light leading-relaxed drop-shadow"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
+            Discover handpicked luxury apparel, trending fashion, and exclusive collections directly from verified global independent designers.
+          </p>
+
+          {/* Feature Badges */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-3 max-w-3xl">
+            {[
+              { icon: '✦', text: 'Curated Collections' },
+              { icon: '✦', text: 'Verified Sellers' },
+              { icon: '✦', text: '100% Authentic Apparel' },
+            ].map((feature) => (
+              <div
+                key={feature.text}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-md transition-all duration-300 shadow-sm"
+              >
+                <span className="text-indigo-400 text-xs font-bold">{feature.icon}</span>
+                <span className="text-xs sm:text-sm font-medium text-white tracking-wide" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  {feature.text}
+                </span>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
+        {/* Bottom Decorative Fade */}
+        <div className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-slate-50 to-transparent pointer-events-none" />
+      </div>
+
+      <div className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+
         {/* Heading */}
         <div className="mb-8 pb-4 border-b border-slate-200">
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900" style={{ fontFamily: 'Playfair Display, serif' }}>

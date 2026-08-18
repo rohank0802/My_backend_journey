@@ -44,12 +44,13 @@ export const useSellerProduct = () => {
     const handleGetSellerProductDetail=async(productId)=>{
         try {
             dispatch(setLoading(true))
+            dispatch(setError(null))
             const response=await getSellerProductDetail(productId)
             dispatch(setSellerProducts(response.product))
 
             return true;
         } catch (error) {
-            dispatch(setError(error))
+            dispatch(setError(error.response?.data?.message || error.message || "Failed to load product"))
             return false;
         }
         finally {
@@ -59,24 +60,20 @@ export const useSellerProduct = () => {
 
     const handleCreateSellerVariant=async(productId,variantData)=>{
         try {
-            
             const response=await createSellerVariantApi(productId,variantData)
-          
-
-            return response.variant;
+            return { success: true, variant: response.variant };
         } catch (error) {
             const data = error.response?.data
-            if (data?.errors) {
-                //express  validator error
-                dispatch(setError(data.errors))
-                return data.errors
-            } else {
-                dispatch(setError(data?.message || error.message))
-                return data?.message||error.message
+            let message = "Failed to create variant."
+            if (data?.errors && Array.isArray(data.errors)) {
+                message = data.errors.map((e) => e.msg || e.message).join(', ')
+            } else if (data?.message) {
+                message = data.message
+            } else if (error.message) {
+                message = error.message
             }
-            
+            return { success: false, message };
         }
-        
     }
 
     return {

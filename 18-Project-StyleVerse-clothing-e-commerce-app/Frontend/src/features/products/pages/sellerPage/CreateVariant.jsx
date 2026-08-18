@@ -3,7 +3,7 @@ import { useSellerProduct } from '../../hook/useSellerProduct.js'
 
 const MAX_IMAGES = 7
 
-const CreateVariant = ({ productId, isOpen, onClose, onSuccess }) => {
+const CreateVariant = ({ productId, existingVariants = [], isOpen, onClose, onSuccess }) => {
   const { handleCreateSellerVariant } = useSellerProduct()
 
   // ── INITIAL FORM STATE ──────────────────────────────────────────────────
@@ -75,12 +75,26 @@ const CreateVariant = ({ productId, isOpen, onClose, onSuccess }) => {
     setError(null)
     setSuccess('')
 
+    const inputSku = formData.sku.trim().toUpperCase()
+
     // Client-side validations
-    if (!formData.sku.trim()) {
+    if (!inputSku) {
       setError('SKU code is required (e.g. TS-BLACK-M).')
       setLoading(false)
       return
     }
+
+    // Single product SKU check: Each variant in THIS product must have a unique SKU
+    const isSkuDuplicate = Array.isArray(existingVariants) && existingVariants.some(
+      (v) => v.sku && v.sku.trim().toUpperCase() === inputSku
+    )
+
+    if (isSkuDuplicate) {
+      setError(`SKU "${inputSku}" already exists for this product. Please enter a different SKU.`)
+      setLoading(false)
+      return
+    }
+
     if (!formData.size.trim()) {
       setError('Size is required.')
       setLoading(false)
@@ -95,7 +109,7 @@ const CreateVariant = ({ productId, isOpen, onClose, onSuccess }) => {
     try {
       // Build FormData to send to backend API
       const payload = new FormData()
-      payload.append('sku', formData.sku.trim().toUpperCase())
+      payload.append('sku', inputSku)
       if (formData.color.trim()) payload.append('color', formData.color.trim())
       payload.append('size', formData.size.trim())
       payload.append('stock', Number(formData.stock))

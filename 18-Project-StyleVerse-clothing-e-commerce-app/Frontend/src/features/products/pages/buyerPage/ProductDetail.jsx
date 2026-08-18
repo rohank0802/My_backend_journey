@@ -1,8 +1,9 @@
-import { useParams, Link } from "react-router-dom"
+import { useParams, Link, useNavigate } from "react-router-dom"
+import { useSelector } from "react-redux"
 import { useBuyerProduct } from "../../hook/useBuyerProduct.js"
 import { useEffect, useState } from "react"
 import BuyerVarientDetail from "./BuyerVarientDetail.jsx"
-
+import {useBuyerCart} from "../../../cart/hook/useBuyerCart.js"
 /**
  * ProductDetail Component (Buyer Page)
  * --------------------------------------------------------------------------
@@ -12,6 +13,21 @@ import BuyerVarientDetail from "./BuyerVarientDetail.jsx"
 function ProductDetail() {
     // ── 1. Extract productId parameter from the URL (/product/:productId) ──────
     const { productId } = useParams()
+    const navigate = useNavigate()
+    const user = useSelector((state) => state.auth.user)
+    const { handleAddItem } = useBuyerCart()
+
+    // Handler to check authentication before adding item to cart
+    const handleAddToCart = () => {
+        if (!user) {
+            navigate('/login')
+            return
+        }
+        handleAddItem({
+            productId: product?._id || productId?.id || productId,
+            variantId: selectedVariant?._id || selectedVariant?.id
+        })
+    }
 
     // ── 2. Custom Hook for calling the buyer product API ───────────────────────
     const { handleProductdetail } = useBuyerProduct()
@@ -256,7 +272,8 @@ function ProductDetail() {
                                 Buy Now
                             </button>
 
-                            <button
+                            <button 
+                                onClick={handleAddToCart}
                                 className="w-full sm:flex-1 h-13 py-3.5 px-6 bg-white hover:bg-slate-50 text-slate-900 font-semibold text-sm rounded-2xl border border-slate-300 transition-all flex items-center justify-center gap-2 shadow-sm hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
                                 <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
