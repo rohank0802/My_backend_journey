@@ -1,5 +1,5 @@
-import {addItem,getCartItems} from "../service/cart.service.js"
-import{addItems as additemToCart,setCartItems,setCartLoading,setCartError} from "../state/cart.slice.js"
+import {addItem,getCartItems,incrementCartItemApi,decrementCartItemApi,deleteCartItemApi} from "../service/cart.service.js"
+import{addItems as additemToCart,setCartItems,setCartLoading,setCartError,incrementCartItem,decrementCartItem,deletecartItem} from "../state/cart.slice.js"
 import { useDispatch } from "react-redux"
 
 
@@ -42,7 +42,49 @@ export const useBuyerCart=()=>{
         }
     }
 
+    async function handleIncrementCartItem(productId,variantId){
+       try{
+        const result=await incrementCartItemApi(productId,variantId)
+        if(result){
+            dispatch(incrementCartItem({productId,variantId}))
+         }
+        return true
+       }
+       catch(error){
+        const message=error.response?.data?.message||error.message||"failed to increment cart item"
+        return message
+       }
+    }
+
+    async function handleDecrementCartItem(productId,variantId){
+        try{
+            const result=await decrementCartItemApi(productId,variantId)
+            if(result){
+                dispatch(decrementCartItem({productId,variantId}))
+            }
+            return true
+        }
+        catch(error){
+            const message=error.response?.data?.message||error.message||"failed to decrement cart item"
+            return message
+        }
+    }
+
+    async function handleDeleteCartItem(productId,variantId){
+        try{
+            const result=await deleteCartItemApi(productId,variantId)
+            if(result){
+                dispatch(deletecartItem({productId,variantId}))
+            }
+            return true
+        }
+        catch(error){
+            const message=error.response?.data?.message||error.message||"failed to delete cart item"
+            return message
+        }
+    }
+
     return {
-        handleAddItem,handleGetCartItems
+        handleAddItem,handleGetCartItems,handleIncrementCartItem,handleDecrementCartItem,handleDeleteCartItem
     }
 }

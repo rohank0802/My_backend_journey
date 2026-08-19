@@ -14,3 +14,21 @@ export const validateAddTooCart=[
     body("quantity").optional().isInt({min:1}).withMessage("Quantity must be at least 1"),
     validateCartRequest
 ]
+
+export const validateIncrementCartItemQuanity=[
+    param("productId").isMongoId().withMessage("Invalid ProductId"),
+     param("variantId").optional().isMongoId().withMessage("Invalid variant ID"),
+     validateCartRequest
+]
+
+export const validateDecrementCartItemQuanity=[
+    param("productId").isMongoId().withMessage("Invalid ProductId"),
+     param("variantId").optional().isMongoId().withMessage("Invalid variant ID"),
+     validateCartRequest
+]
+
+export const validateDeleteVarinatInCart=[
+    param("productId").isMongoId().withMessage("Invalid ProductId"),
+     param("variantId").optional().isMongoId().withMessage("Invalid variant ID"),
+     validateCartRequest
+]

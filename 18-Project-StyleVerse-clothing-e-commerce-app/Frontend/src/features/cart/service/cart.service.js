@@ -28,3 +28,35 @@ export const getCartItems=async()=>{
         throw error
     }
 }
+
+
+export const incrementCartItemApi=async(productId,variantId)=>{
+    try{
+     const response=await cartApiInstance.patch(`/quantity/increment/${productId}/${variantId}`)
+     return response.data
+    }
+    catch(error){
+        throw error
+    }
+}
+
+export const decrementCartItemApi=async(productId,variantId)=>{
+    try{
+     const response=await cartApiInstance.patch(`/quantity/decrement/${productId}/${variantId}`)
+     return response.data
+    }
+    catch(error){
+        throw error
+    }
+}
+
+export const deleteCartItemApi=async(productId,variantId)=>{
+    
+    try{
+     const response=await cartApiInstance.delete(`/variant/delete/${productId}/${variantId}`)
+     return response.data
+    }
+    catch(error){
+        throw error
+    }
+}

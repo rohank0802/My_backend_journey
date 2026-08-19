@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
-import { useBuyerCart } from '../hook/useBuyerCart.js'
+import { useBuyerCart, } from '../hook/useBuyerCart.js'
 
 /**
  * CartPage Component (Buyer View)
@@ -16,7 +16,7 @@ function CartPage() {
   const isLoading = useSelector((state) => state.cart.cartLoading)
   const error = useSelector((state) => state.cart.cartError)
 
-  const { handleGetCartItems } = useBuyerCart()
+  const { handleGetCartItems,handleIncrementCartItem,handleDecrementCartItem,handleDeleteCartItem } = useBuyerCart()
 
   // ── 2. Fetch cart items on mount ──────────────────────────────────────────
   useEffect(() => {
@@ -167,10 +167,23 @@ function CartPage() {
                 return (
                   <div
                     key={item._id}
-                    className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-indigo-200 transition-all duration-200 flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between"
+                    className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-indigo-200 transition-all duration-200 flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between relative"
                   >
+                    {/* Top Right Cross Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCartItem(item.product?._id, variantObj?._id)}
+                      className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 border border-slate-200 flex items-center justify-center transition-all cursor-pointer shadow-2xs z-10"
+                      aria-label="Remove item"
+                      title="Remove item"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+
                     {/* Item Thumbnail & Basic Info */}
-                    <div className="flex items-center gap-4 sm:gap-5 flex-1">
+                    <div className="flex items-center gap-4 sm:gap-5 flex-1 pr-6 sm:pr-0">
                       <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-indigo-50/50 border border-slate-100 overflow-hidden shrink-0 flex items-center justify-center relative">
                         {displayImg ? (
                           <img
@@ -224,8 +237,8 @@ function CartPage() {
                       </div>
                     </div>
 
-                    {/* Quantity & Item Subtotal */}
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 gap-4">
+                    {/* Quantity & Item Subtotal (pr-10 prevents overlap with top-right delete icon) */}
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 gap-4 sm:pr-10">
                       
                       {/* Price Display */}
                       <div className="text-right">
@@ -239,11 +252,25 @@ function CartPage() {
                         )}
                       </div>
 
-                      {/* Quantity Selector Chip */}
-                      <div className="flex items-center gap-2 bg-slate-100/80 border border-slate-200 rounded-xl px-2 py-1">
-                        <span className="text-xs text-slate-500 font-medium px-2">
-                          Qty: <strong className="text-slate-900">{item.quantity || 1}</strong>
+                      {/* Quantity Selector with Minus & Plus Buttons */}
+                      <div className="flex items-center gap-1 bg-slate-100/80 border border-slate-200 rounded-xl p-1">
+                        <button
+                          onClick={() => handleDecrementCartItem(item.product._id, variantObj?._id)}
+                          type="button"
+                          className="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                        >
+                          −
+                        </button>
+                        <span className="w-8 text-center text-xs font-bold text-slate-900">
+                          {item.quantity || 1}
                         </span>
+                        <button
+                          onClick={() => handleIncrementCartItem(item.product._id, variantObj?._id)}
+                          type="button"
+                          className="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                        >
+                          +
+                        </button>
                       </div>
 
                     </div>
