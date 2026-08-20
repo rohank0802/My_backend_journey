@@ -22,6 +22,8 @@ export const addToCartController=async(req,res)=>{
                 success:false
             })
         }
+
+        const selectedVariant=product.variants.id(variantId)
         
         //calling function to find stock of selected variant
         const stock=await stockOfVariant(productId,variantId)
@@ -103,7 +105,7 @@ export const addToCartController=async(req,res)=>{
             variant:variantId,
             quantity:quantity,
             price:{
-                amount:product.price.amount
+                amount:selectedVariant.price.amount
             }
         })
         
