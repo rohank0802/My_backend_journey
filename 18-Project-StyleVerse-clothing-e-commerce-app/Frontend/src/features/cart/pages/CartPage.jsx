@@ -8,19 +8,45 @@ import { useBuyerProduct } from '../../products/hook/useBuyerProduct.js'
  * CartPage Component (Buyer View)
  * --------------------------------------------------------------------------
  * Premium luxury shopping cart interface designed following StyleVerse editorial guidelines.
- * Displays items fetched via handleGetCartItems(), calculates total pricing,
- * compares current live product/variant prices from ProductDetail API,
+ * Displays items fetched via handleGetCartItems(), handles populated variant objects,
+ * calculates total pricing, compares current live product/variant prices from ProductDetail API,
  * and handles loading and error states from Redux.
  */
 function CartPage() {
   // ── 1. Extract Cart state from Redux Store ───────────────────────────────
-  // Reads cart items, loading status, and error messages from the global Redux store
-  const cartItems = useSelector((state) => state.cart.items) || []
+  const rawCartItems = useSelector((state) => state.cart.items)
+  const totalPrice = useSelector((state) => state.cart.totalPrice)
+  const currency = useSelector((state) => state.cart.currency)
   const isLoading = useSelector((state) => state.cart.cartLoading)
   const error = useSelector((state) => state.cart.cartError)
 
+  // ── Helper: Safely extract array of cart items from any nested response structure ──
+  const getCartItemsList = (rawState) => {
+    if (!rawState) return []
+    // 1. Direct array of items or array of cart container objects
+    if (Array.isArray(rawState)) {
+      if (rawState.length > 0 && rawState[0] && Array.isArray(rawState[0].items)) {
+        return rawState[0].items
+      }
+      return rawState
+    }
+    // 2. Object with cart array like { cart: [ { items: [...] } ] }
+    if (Array.isArray(rawState.cart)) {
+      if (rawState.cart.length > 0 && rawState.cart[0] && Array.isArray(rawState.cart[0].items)) {
+        return rawState.cart[0].items
+      }
+      return rawState.cart
+    }
+    // 3. Object with items array like { items: [...] }
+    if (Array.isArray(rawState.items)) {
+      return rawState.items
+    }
+    return []
+  }
+
+  const cartItems = getCartItemsList(rawCartItems)
+
   // ── 2. Extract Cart Action Handlers from useBuyerCart custom hook ────────
-  // Provides methods to fetch cart items, update quantities, and remove items
   const { 
     handleGetCartItems, 
     handleIncrementCartItem, 
@@ -32,7 +58,6 @@ function CartPage() {
   const { handleProductdetail } = useBuyerProduct()
 
   // ── 3. Local State to store live product/variant details from API ───────
-  // Map structure: { [productId]: productDetailObject }
   const [latestProductsMap, setLatestProductsMap] = useState({})
 
   // ── 4. Fetch cart items on initial component mount ────────────────────────
@@ -40,17 +65,45 @@ function CartPage() {
     handleGetCartItems()
   }, [])
 
+  // ── Helper: Safely extract Product ID string ─────────────────────────────
+  const getProductId = (item) => {
+    if (!item) return null
+    if (typeof item.product === 'object' && item.product !== null) {
+      return item.product._id || item.product.id || null
+    }
+    if (typeof item.product === 'string') {
+      return item.product
+    }
+    return null
+  }
+
+  // ── Helper: Safely extract Variant ID string ─────────────────────────────
+  const getVariantId = (item) => {
+    if (!item) return null
+    if (typeof item.variant === 'object' && item.variant !== null) {
+      return item.variant._id || item.variant.id || null
+    }
+    if (typeof item.variant === 'string') {
+      return item.variant
+    }
+    if (item.product && typeof item.product === 'object' && item.product.variants) {
+      if (typeof item.product.variants === 'object' && !Array.isArray(item.product.variants)) {
+        return item.product.variants._id || item.product.variants.id || null
+      }
+    }
+    return null
+  }
+
   // ── 5. Fetch live ProductDetail data to compare current variant prices ────
-  // Automatically runs whenever cartItems update to fetch current live prices from backend
   useEffect(() => {
     async function fetchLatestProducts() {
       if (!cartItems || cartItems.length === 0) return
 
-      // Collect unique product IDs from all items currently in cart
+      // Collect unique product IDs from all cart items
       const productIds = Array.from(
         new Set(
           cartItems
-            .map((item) => item.product?._id || (typeof item.product === 'string' ? item.product : null))
+            .map((item) => getProductId(item))
             .filter(Boolean)
         )
       )
@@ -78,22 +131,37 @@ function CartPage() {
   }, [cartItems])
 
   // ── Helper: Read price directly from backend cart item data ────────────────
-  // Resolves the price saved directly on the cart item (or base product fallback)
   const getItemPrice = (item) => {
     if (!item) return 0
 
     // 1. Direct price from backend item object (item.price.amount or item.price number)
     if (item.price !== undefined && item.price !== null) {
       const p = typeof item.price === 'object' ? item.price.amount : Number(item.price)
-      if (p !== undefined && p !== null && !isNaN(p)) {
+      if (p !== undefined && p !== null && !isNaN(p) && p > 0) {
         return p
       }
     }
 
-    // 2. Fallback to product.price from backend
+    // 2. Price from populated product.variants object (if variants is an object)
+    if (item.product?.variants && typeof item.product.variants === 'object' && !Array.isArray(item.product.variants)) {
+      const p = typeof item.product.variants.price === 'object' ? item.product.variants.price.amount : Number(item.product.variants.price)
+      if (p !== undefined && p !== null && !isNaN(p) && p > 0) {
+        return p
+      }
+    }
+
+    // 3. Price from populated item.variant object
+    if (typeof item.variant === 'object' && item.variant?.price) {
+      const p = typeof item.variant.price === 'object' ? item.variant.price.amount : Number(item.variant.price)
+      if (p !== undefined && p !== null && !isNaN(p) && p > 0) {
+        return p
+      }
+    }
+
+    // 4. Fallback to product.price from backend
     if (item.product?.price !== undefined && item.product?.price !== null) {
       const p = typeof item.product.price === 'object' ? item.product.price.amount : Number(item.product.price)
-      if (p !== undefined && p !== null && !isNaN(p)) {
+      if (p !== undefined && p !== null && !isNaN(p) && p > 0) {
         return p
       }
     }
@@ -102,18 +170,17 @@ function CartPage() {
   }
 
   // ── Helper: Read live current variant price from ProductDetail API ─────────
-  // Searches latestProductsMap for the current live price of the variant/product
   const getFreshVariantPrice = (item) => {
-    const productId = item.product?._id || (typeof item.product === 'string' ? item.product : null)
+    const productId = getProductId(item)
     if (!productId || !latestProductsMap[productId]) return null
 
     const freshProduct = latestProductsMap[productId]
-    const variantId = typeof item.variant === 'object' ? item.variant?._id : item.variant
+    const variantId = getVariantId(item)
 
     // Search for variant in fresh product details
     const freshVariant = Array.isArray(freshProduct.variants)
       ? freshProduct.variants.find((v) => v._id === variantId || v.id === variantId)
-      : null
+      : (typeof freshProduct.variants === 'object' ? freshProduct.variants : null)
 
     // Check variant price first
     if (freshVariant?.price) {
@@ -130,16 +197,14 @@ function CartPage() {
     return null
   }
 
-  // ── 6. Calculate order subtotal & total ───────────────────────────────────
-  // Sum of (itemPrice * itemQuantity) across all items in cart
-  const subtotal = cartItems.reduce((acc, item) => {
+  const calculatedSubtotal = cartItems.reduce((acc, item) => {
     const price = getItemPrice(item)
     return acc + price * (item.quantity || 1)
   }, 0)
 
-  const currencySymbol = cartItems.length > 0 && cartItems[0].price?.currency === 'USD' ? '$' : '₹'
-  const estimatedTax = Math.round(subtotal * 0.05) // 5% estimated tax
-  const totalAmount = subtotal + estimatedTax
+  const subtotal = (totalPrice !== null && totalPrice !== undefined && !isNaN(Number(totalPrice))) ? Number(totalPrice) : calculatedSubtotal
+  const currencySymbol = (currency === 'USD' || (cartItems.length > 0 && cartItems[0].price?.currency === 'USD')) ? '$' : '₹'
+  const totalAmount = subtotal
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 py-10 px-4 sm:px-6 lg:px-12" style={{ fontFamily: 'Inter, sans-serif' }}>
@@ -233,25 +298,27 @@ function CartPage() {
             {/* ── LEFT COLUMN: CART ITEMS LIST (8 cols) ────────────────── */}
             <div className="lg:col-span-8 space-y-4">
               {cartItems.map((item) => {
-                const product = item.product || {}
+                const product = typeof item.product === 'object' && item.product !== null ? item.product : {}
+                const productId = getProductId(item)
+                const variantId = getVariantId(item)
                 
-                // Resolve variant object
-                const variantObj = typeof item.variant === 'object'
-                  ? item.variant
-                  : Array.isArray(product.variants)
-                    ? product.variants.find((v) => v._id === item.variant || v.id === item.variant)
-                    : null
+                // Resolve variant object (whether populated as object inside item.variant, product.variants, or in array)
+                let variantObj = null
+                if (typeof item.variant === 'object' && item.variant !== null) {
+                  variantObj = item.variant
+                } else if (product.variants && typeof product.variants === 'object' && !Array.isArray(product.variants)) {
+                  variantObj = product.variants
+                } else if (Array.isArray(product.variants)) {
+                  variantObj = product.variants.find((v) => v._id === variantId || v.id === variantId) || null
+                }
 
                 // Resolve image (variant image fallback to product image)
-                const variantImg = variantObj?.images?.[0]
-                  ? (typeof variantObj.images[0] === 'object' ? variantObj.images[0].url : variantObj.images[0])
-                  : null
-
-                const productImg = product.images?.[0]
-                  ? (typeof product.images[0] === 'object' ? product.images[0].url : product.images[0])
-                  : null
-
-                const displayImg = variantImg || productImg
+                let displayImg = null
+                if (variantObj && Array.isArray(variantObj.images) && variantObj.images.length > 0) {
+                  displayImg = typeof variantObj.images[0] === 'object' ? variantObj.images[0].url : variantObj.images[0]
+                } else if (product && Array.isArray(product.images) && product.images.length > 0) {
+                  displayImg = typeof product.images[0] === 'object' ? product.images[0].url : product.images[0]
+                }
 
                 // Resolve prices
                 const cartPrice = getItemPrice(item)
@@ -260,13 +327,13 @@ function CartPage() {
 
                 return (
                   <div
-                    key={item._id}
+                    key={item._id || `${productId}-${variantId}`}
                     className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-indigo-200 transition-all duration-200 flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between relative"
                   >
                     {/* Top Right Cross Button */}
                     <button
                       type="button"
-                      onClick={() => handleDeleteCartItem(item.product?._id, variantObj?._id)}
+                      onClick={() => handleDeleteCartItem(productId, variantId)}
                       className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 w-7 h-7 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 border border-slate-200 flex items-center justify-center transition-all cursor-pointer shadow-2xs z-10"
                       aria-label="Remove item"
                       title="Remove item"
@@ -297,7 +364,7 @@ function CartPage() {
 
                       <div className="space-y-1.5">
                         <Link
-                          to={`/products/${product._id}`}
+                          to={`/products/${productId}`}
                           className="text-base sm:text-lg font-semibold text-slate-900 hover:text-indigo-600 transition-colors line-clamp-1"
                           style={{ fontFamily: 'Playfair Display, serif' }}
                         >
@@ -346,7 +413,7 @@ function CartPage() {
                       </div>
                     </div>
 
-                    {/* Quantity & Item Subtotal (pr-10 prevents overlap with top-right delete icon) */}
+                    {/* Quantity & Item Subtotal */}
                     <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 gap-4 sm:pr-10">
                       
                       {/* Price Display */}
@@ -364,7 +431,7 @@ function CartPage() {
                       {/* Quantity Selector with Minus & Plus Buttons */}
                       <div className="flex items-center gap-1 bg-slate-100/80 border border-slate-200 rounded-xl p-1">
                         <button
-                          onClick={() => handleDecrementCartItem(item.product._id, variantObj?._id)}
+                          onClick={() => handleDecrementCartItem(productId, variantId)}
                           type="button"
                           className="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
                         >
@@ -374,7 +441,7 @@ function CartPage() {
                           {item.quantity || 1}
                         </span>
                         <button
-                          onClick={() => handleIncrementCartItem(item.product._id, variantObj?._id)}
+                          onClick={() => handleIncrementCartItem(productId, variantId)}
                           type="button"
                           className="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-sm flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
                         >
@@ -396,16 +463,11 @@ function CartPage() {
                   Order Summary
                 </h2>
 
-                {/* Subtotal, Tax, Shipping */}
+                {/* Subtotal & Shipping */}
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between text-slate-600">
                     <span>Subtotal</span>
                     <span className="font-semibold text-slate-900">{currencySymbol}{subtotal.toLocaleString('en-IN')}</span>
-                  </div>
-
-                  <div className="flex justify-between text-slate-600">
-                    <span>Estimated Tax (5%)</span>
-                    <span className="font-semibold text-slate-900">{currencySymbol}{estimatedTax.toLocaleString('en-IN')}</span>
                   </div>
 
                   <div className="flex justify-between text-slate-600">

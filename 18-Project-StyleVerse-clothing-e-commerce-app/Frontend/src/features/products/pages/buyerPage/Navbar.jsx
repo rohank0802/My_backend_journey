@@ -9,11 +9,15 @@ function Navbar() {
   const user = useSelector((state) => state.auth.user)
 
   // ── 2. Read cart items from Redux store ──────────────────────────────────
-  const cartItems = useSelector((state) => state.cart.items) || []
+  const rawCartItems = useSelector((state) => state.cart.items) || []
+
+  // Extract items array if rawCartItems is container array [{ items: [...] }]
+  const cartItemsList = Array.isArray(rawCartItems) && rawCartItems.length > 0 && Array.isArray(rawCartItems[0]?.items)
+    ? rawCartItems[0].items
+    : (Array.isArray(rawCartItems) ? rawCartItems : [])
 
   // ── 3. Calculate total quantity of items in the cart ─────────────────────
-  // Simple beginner-friendly loop to add up quantities
-  const totalCartCount = cartItems.reduce((sum, item) => {
+  const totalCartCount = cartItemsList.reduce((sum, item) => {
     return sum + (item.quantity || 1)
   }, 0)
 

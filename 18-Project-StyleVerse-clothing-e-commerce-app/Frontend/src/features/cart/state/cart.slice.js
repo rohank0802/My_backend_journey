@@ -5,6 +5,8 @@ import { createSlice } from "@reduxjs/toolkit";
 const cartSlice=createSlice({
 name:"cart",
 initialState:{
+    totalPrice:null,
+    currency:null,
     items:[],//array of products
     cartLoading:false,
     cartError:null,
@@ -16,7 +18,10 @@ reducers:{
         
     },
     setCartItems:(state,action)=>{
-        state.items=action.payload
+        const cart=action.payload[0]
+        state.items=action.payload,
+        state.totalPrice=cart.totalcartItemsPrice,
+        state.currency=cart.currency
     },
     setCartLoading:(state,action)=>{
         state.cartLoading=action.payload
