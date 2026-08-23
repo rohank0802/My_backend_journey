@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authAccessUser } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js";
 import {validateAddTooCart,validateIncrementCartItemQuanity,validateDecrementCartItemQuanity,validateDeleteVarinatInCart} from "../validators/cart.validator.js"
-import {addToCartController,getCartController,IncrementCartItemQunatity,decrementcartItemQuantity,deleteCartproductVariant} from "../controllers/cart.controller.js"
+import {addToCartController,getCartController,IncrementCartItemQunatity,decrementcartItemQuantity,deleteCartproductVariant,createOrderController,verifyOrderController} from "../controllers/cart.controller.js"
 const cartRoute=Router()
 
 
@@ -49,5 +49,13 @@ cartRoute.patch("/quantity/decrement/:productId/:variantId",authAccessUser,autho
  */
 cartRoute.delete("/variant/delete/:productId/:variantId",authAccessUser,authorizeRoles("buyer"),validateDeleteVarinatInCart,deleteCartproductVariant)
 
+
+//payment 
+/**
+ * @route POST /api/cart/payment/create/order
+ */
+cartRoute.post("/payment/create/order",authAccessUser,authorizeRoles("buyer"),createOrderController)
+
+cartRoute.post("/payment/verify/order",authAccessUser,authorizeRoles("buyer"),verifyOrderController)
 
 export default cartRoute

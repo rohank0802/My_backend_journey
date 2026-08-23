@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useBuyerCart } from '../hook/useBuyerCart.js'
 import { useBuyerProduct } from '../../products/hook/useBuyerProduct.js'
+import { useRazorpay, } from "react-razorpay";
 
 /**
  * CartPage Component (Buyer View)
@@ -13,13 +14,16 @@ import { useBuyerProduct } from '../../products/hook/useBuyerProduct.js'
  * and handles loading and error states from Redux.
  */
 function CartPage() {
+
+const { error, isLoading, Razorpay } = useRazorpay();
+const navigate=useNavigate()
   // ── 1. Extract Cart state from Redux Store ───────────────────────────────
   const rawCartItems = useSelector((state) => state.cart.items)
   const totalPrice = useSelector((state) => state.cart.totalPrice)
   const currency = useSelector((state) => state.cart.currency)
-  const isLoading = useSelector((state) => state.cart.cartLoading)
-  const error = useSelector((state) => state.cart.cartError)
-
+  const isLoadingg = useSelector((state) => state.cart.cartLoading)
+  const errorr = useSelector((state) => state.cart.cartError)
+  const user=useSelector((state)=>state.auth.user)
   // ── Helper: Safely extract array of cart items from any nested response structure ──
   const getCartItemsList = (rawState) => {
     if (!rawState) return []
@@ -51,8 +55,42 @@ function CartPage() {
     handleGetCartItems, 
     handleIncrementCartItem, 
     handleDecrementCartItem, 
-    handleDeleteCartItem 
+    handleDeleteCartItem ,handleCreateCartOrder,handleVerifyPayment
   } = useBuyerCart()
+
+//for order checkout button
+async function  handleCheckout(){
+  const order=await handleCreateCartOrder()
+  console.log(order)
+
+
+ const options = {
+      key: "rzp_test_TSnDWdTZqa3o3g",
+      amount: order.amount, // Amount in paise
+      currency: order.currency,
+      name: "StyleVerse",
+      description: "Test Transaction",
+      order_id: order.id, // Generate order_id on server
+      handler: async(response) => {
+        const idValid=await handleVerifyPayment(response)
+        if(idValid){
+          navigate(`/OrderPaySuccess?order_id=${response.razorpay_order_id}`)
+        }
+      },
+      prefill: {
+        name: user?.fullName,
+        email: user?.email,
+        contact: user.contact,
+      },
+      theme: {
+        color: "#F37254",
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+
+}
 
   // Extract handleProductdetail to fetch live product details for price comparison
   const { handleProductdetail } = useBuyerProduct()
@@ -240,7 +278,7 @@ function CartPage() {
         </div>
 
         {/* ── LOADING STATE ────────────────────────────────────────────── */}
-        {isLoading && (
+        {isLoadingg && (
           <div className="bg-white rounded-3xl border border-slate-200 p-16 flex flex-col items-center justify-center gap-4 text-center shadow-xs">
             <div className="w-10 h-10 border-3 border-slate-200 border-t-indigo-600 rounded-full animate-spin" />
             <p className="text-slate-600 text-sm font-medium">Fetching your curated cart items...</p>
@@ -248,7 +286,7 @@ function CartPage() {
         )}
 
         {/* ── ERROR STATE ──────────────────────────────────────────────── */}
-        {!isLoading && error && (
+        {!isLoadingg && errorr && (
           <div className="bg-rose-50/80 rounded-3xl border border-rose-200 p-10 flex flex-col items-center justify-center text-center space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -267,7 +305,7 @@ function CartPage() {
         )}
 
         {/* ── EMPTY CART STATE ─────────────────────────────────────────── */}
-        {!isLoading && !error && cartItems.length === 0 && (
+        {!isLoadingg && !errorr && cartItems.length === 0 && (
           <div className="bg-white rounded-3xl border border-slate-200 p-16 flex flex-col items-center justify-center text-center space-y-5 shadow-xs">
             <div className="w-20 h-20 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner">
               <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -292,7 +330,7 @@ function CartPage() {
         )}
 
         {/* ── CART CONTENT (LIST + ORDER SUMMARY) ───────────────────────── */}
-        {!isLoading && !error && cartItems.length > 0 && (
+        {!isLoadingg && !errorr && cartItems.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             
             {/* ── LEFT COLUMN: CART ITEMS LIST (8 cols) ────────────────── */}
@@ -489,6 +527,7 @@ function CartPage() {
 
                 {/* Checkout Button */}
                 <button
+                onClick={handleCheckout}
                   type="button"
                   className="w-full h-13 py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-sm font-semibold rounded-2xl transition-all shadow-md shadow-indigo-200 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
                 >

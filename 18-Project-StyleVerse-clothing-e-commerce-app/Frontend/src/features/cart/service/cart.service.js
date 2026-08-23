@@ -60,3 +60,26 @@ export const deleteCartItemApi=async(productId,variantId)=>{
         throw error
     }
 }
+
+
+export const createcartOrder=async()=>{
+    try{
+
+        const response=await cartApiInstance.post("/payment/create/order")
+        return response.data
+    }
+    catch(error){
+        throw error
+}
+}
+
+
+export const verifyPaymentApi=async({razorpay_order_id,razorpay_payment_id,razorpay_signature})=>{
+    try{
+        const response=await cartApiInstance.post("/payment/verify/order",{razorpay_order_id,razorpay_payment_id,razorpay_signature})
+        return response.data
+    }
+    catch(error){
+        throw error
+    }
+}

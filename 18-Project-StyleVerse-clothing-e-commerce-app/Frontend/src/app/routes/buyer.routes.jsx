@@ -6,6 +6,7 @@ import BuyerLayout from "../../features/products/pages/buyerPage/BuyerLayout.jsx
 import BuyerDashboard from "../../features/Dashboard/BuyerDashboard.jsx";
 import ProductDetail from "../../features/products/pages/buyerPage/ProductDetail.jsx";
 import CartPage from "../../features/cart/pages/CartPage.jsx";
+import OrderSuccess from "../../features/cart/pages/OrderSuccess.jsx";
 export const buyerRoutes = [
     {
         element: <BuyerLayout />,
@@ -36,6 +37,10 @@ export const buyerRoutes = [
                     {
                         path:"/buyer/cart",
                         element:<CartPage/>
+                    },
+                    {
+                        path:"/OrderPaySuccess",
+                        element:<OrderSuccess/>
                     }
                 ]
             }
