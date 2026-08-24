@@ -5,8 +5,8 @@ import { useLocation, Link } from 'react-router-dom'
  * OrderSuccess Component (Buyer Experience)
  * --------------------------------------------------------------------------
  * Premium luxury order confirmation screen following StyleVerse editorial guidelines.
- * Displays order ID extracted from query params (`order_id`), order status timeline,
- * summary highlights, and quick navigation actions.
+ * Displays order ID extracted from query params (`order_id`), summary highlights,
+ * and quick navigation actions.
  */
 function OrderSuccess() {
   const location = useLocation()
@@ -17,13 +17,6 @@ function OrderSuccess() {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  })
-
-  // Estimated delivery date (3-5 days from today)
-  const deliveryDate = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
   })
 
   const handlePrint = () => {
@@ -72,10 +65,10 @@ function OrderSuccess() {
             </div>
 
             {/* ── ORDER DETAILS HIGHLIGHT GRID ────────────────────────────── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
               
               {/* Order ID */}
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-1">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
                   Order ID
                 </span>
@@ -87,7 +80,7 @@ function OrderSuccess() {
               </div>
 
               {/* Order Date */}
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-1">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
                   Date Placed
                 </span>
@@ -97,7 +90,7 @@ function OrderSuccess() {
               </div>
 
               {/* Payment Method */}
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-1">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
                   Payment Gateway
                 </span>
@@ -107,86 +100,6 @@ function OrderSuccess() {
                 </div>
               </div>
 
-              {/* Estimated Delivery */}
-              <div className="space-y-1">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
-                  Estimated Delivery
-                </span>
-                <span className="text-xs font-bold text-emerald-600 block">
-                  Expected by {deliveryDate}
-                </span>
-              </div>
-
-            </div>
-
-            {/* ── ORDER STATUS TRACKER TIMELINE ───────────────────────────── */}
-            <div className="space-y-4 pt-2">
-              <h3
-                className="text-base font-semibold text-slate-900"
-                style={{ fontFamily: 'Playfair Display, serif' }}
-              >
-                Order Fulfillment Status
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 relative">
-                
-                {/* Step 1: Placed */}
-                <div className="p-3.5 rounded-2xl bg-indigo-50/80 border border-indigo-200 flex flex-col justify-between space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-[10px] flex items-center justify-center">
-                      ✓
-                    </span>
-                    <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wide">Done</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">Order Placed</h4>
-                    <p className="text-[10px] text-slate-500">Details verified</p>
-                  </div>
-                </div>
-
-                {/* Step 2: Processing */}
-                <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 flex flex-col justify-between space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-bold text-[10px] flex items-center justify-center animate-spin">
-                      ⏳
-                    </span>
-                    <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wide">Active</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900">Atelier Prep</h4>
-                    <p className="text-[10px] text-slate-500">Packaging items</p>
-                  </div>
-                </div>
-
-                {/* Step 3: Shipped */}
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-2 opacity-60">
-                  <div className="flex items-center justify-between">
-                    <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 font-bold text-[10px] flex items-center justify-center">
-                      3
-                    </span>
-                    <span className="text-[10px] font-medium text-slate-400">Next</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-700">Dispatch</h4>
-                    <p className="text-[10px] text-slate-400">Courier partner</p>
-                  </div>
-                </div>
-
-                {/* Step 4: Delivery */}
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col justify-between space-y-2 opacity-60">
-                  <div className="flex items-center justify-between">
-                    <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 font-bold text-[10px] flex items-center justify-center">
-                      4
-                    </span>
-                    <span className="text-[10px] font-medium text-slate-400">Pending</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-700">Delivery</h4>
-                    <p className="text-[10px] text-slate-400">At your doorstep</p>
-                  </div>
-                </div>
-
-              </div>
             </div>
 
             {/* ── ACTION BUTTONS ──────────────────────────────────────────── */}

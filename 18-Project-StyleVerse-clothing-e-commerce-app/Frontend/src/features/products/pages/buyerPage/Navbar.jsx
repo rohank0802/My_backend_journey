@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import SearchBar from './SearchBar.jsx'
 
 const DEFAULT_LOGO = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><rect width='100' height='100' rx='24' fill='%234F46E5'/><path d='M32 38C32 38 40 24 50 24C60 24 68 38 68 38' stroke='white' stroke-width='6' stroke-linecap='round'/><path d='M26 38H74L70 76C70 78.2091 68.2091 80 66 80H34C31.7909 80 30 78.2091 30 76L26 38Z' fill='white' fill-opacity='0.15' stroke='white' stroke-width='6' stroke-linejoin='round'/><path d='M43 48C43 51.866 46.134 55 50 55C53.866 55 57 51.866 57 48' stroke='white' stroke-width='5' stroke-linecap='round'/></svg>"
 
@@ -23,7 +24,7 @@ function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-md text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
         {/* ── LEFT CORNER: StyleVerse Logo & Navigation ───────────────── */}
         <div className="flex items-center gap-6 sm:gap-8">
@@ -54,6 +55,11 @@ function Navbar() {
               Home
             </NavLink>
           </nav>
+        </div>
+
+        {/* ── MIDDLE: SearchBar Feature Component ────────────────────────── */}
+        <div className="flex-1 max-w-md mx-2 sm:mx-4">
+          <SearchBar />
         </div>
 
         {/* ── RIGHT CORNER: Cart Logo & Profile Avatar ───────────────── */}

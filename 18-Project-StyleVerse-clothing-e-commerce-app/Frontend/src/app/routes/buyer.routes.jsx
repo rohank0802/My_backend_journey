@@ -7,6 +7,7 @@ import BuyerDashboard from "../../features/Dashboard/BuyerDashboard.jsx";
 import ProductDetail from "../../features/products/pages/buyerPage/ProductDetail.jsx";
 import CartPage from "../../features/cart/pages/CartPage.jsx";
 import OrderSuccess from "../../features/cart/pages/OrderSuccess.jsx";
+import ShowSearchedproducts from "../../features/products/pages/buyerPage/ShowSearchedproducts.jsx"
 export const buyerRoutes = [
     {
         element: <BuyerLayout />,
@@ -18,6 +19,10 @@ export const buyerRoutes = [
             {
                 path:"/products/:productId",
                 element:<ProductDetail/>
+            },
+            {
+                path:"/SeachPoduct",
+                element:<ShowSearchedproducts/>
             },
             // Buyer Protected pages
             {

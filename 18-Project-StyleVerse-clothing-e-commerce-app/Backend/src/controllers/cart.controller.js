@@ -394,6 +394,16 @@ try{
         })
     }
 
+   //before ceating order check stock avaiable
+
+   for (const item of cart[0].items){
+    if(item.product.variants.stock<item.quantity){
+        return res.status(400).json({
+            message:`${item.product.title} has only ${item.product.variants.stock} items available`,
+            success:false
+        })
+    }
+   }
     
 
  const order=await createOrder({amount:cart[0].totalcartItemsPrice
@@ -476,6 +486,52 @@ export const verifyOrderController=async(req,res)=>{
                 success:false
             })
         }
+
+       //after successfull payement decrese the item from stock
+       for(const item of payment.orderItems){
+        const updateProduct=await productModel.findOneAndUpdate(
+            {
+              _id:item.productId,
+              variants:{
+                $elemMatch:{
+                    _id:item.variantId,
+                    stock:{$gte:item.quantity}
+                }
+              }
+        },
+       {
+         $inc:{
+            "variants.$.stock":-item.quantity
+        }
+       }
+    );
+
+    if(!updateProduct){
+        return res.status(400).json({
+            message:`Insifficient stock ${item.title}`,
+            success:false
+        })
+    }
+    //remove items from the cart
+    await cartModel.updateOne({
+     user:payment.user
+    },
+   {
+     $pull:{
+         items:{
+          product:item.productId,
+          variant:item.variantId
+         }
+     }
+   }
+ )
+       }
+           
+
+
+
+//mark payment paid
+
         payment.status="paid"
         payment.razorpay.paymentId=razorpay_payment_id
         payment.razorpay.signature=razorpay_signature

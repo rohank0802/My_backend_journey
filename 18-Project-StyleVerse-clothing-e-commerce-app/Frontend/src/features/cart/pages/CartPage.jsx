@@ -286,7 +286,7 @@ async function  handleCheckout(){
         )}
 
         {/* ── ERROR STATE ──────────────────────────────────────────────── */}
-        {!isLoadingg && errorr && (
+        {!isLoadingg && errorr && cartItems.length > 0 && (
           <div className="bg-rose-50/80 rounded-3xl border border-rose-200 p-10 flex flex-col items-center justify-center text-center space-y-4">
             <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -294,7 +294,7 @@ async function  handleCheckout(){
               </svg>
             </div>
             <h3 className="text-lg font-semibold text-slate-900">Unable to Load Shopping Cart</h3>
-            <p className="text-xs text-rose-600 max-w-md">{error}</p>
+            <p className="text-xs text-rose-600 max-w-md">{errorr}</p>
             <button
               onClick={handleGetCartItems}
               className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
@@ -305,7 +305,7 @@ async function  handleCheckout(){
         )}
 
         {/* ── EMPTY CART STATE ─────────────────────────────────────────── */}
-        {!isLoadingg && !errorr && cartItems.length === 0 && (
+        {!isLoadingg && cartItems.length === 0 && (
           <div className="bg-white rounded-3xl border border-slate-200 p-16 flex flex-col items-center justify-center text-center space-y-5 shadow-xs">
             <div className="w-20 h-20 rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner">
               <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

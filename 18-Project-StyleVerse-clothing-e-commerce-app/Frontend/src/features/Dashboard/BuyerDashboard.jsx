@@ -10,6 +10,7 @@ const BuyerDashboard = () => {
 
   // Read products & state from Redux product slice
   const rawProducts = useSelector((state) => state.product.products)
+  console.log(rawProducts)
   const loading = useSelector((state) => state.product.productLoading)
   const error = useSelector((state) => state.product.productError)
 
