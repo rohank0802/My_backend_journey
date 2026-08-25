@@ -1,0 +1,20 @@
+
+# creating image base 
+FROM node:20-alpine
+
+# adding packege.json for install dependencies
+COPY ./package.json .
+COPY ./package-lock.json .
+
+
+# installing npm packages
+RUN  npm install
+
+
+# adding logical files
+
+COPY ./server.js .
+
+
+#starting server
+CMD ["node","server.js"]
